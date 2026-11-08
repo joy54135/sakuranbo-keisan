@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>さくらんぼ計算アプリ</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: linear-gradient(180deg, #fff5f7 0%, #ffeef3 100%);
+    color: #4a2b33;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 48px;
+  }
+  .cherry { font-size: 56px; line-height: 1; }
+  h1 {
+    font-size: clamp(26px, 6vw, 38px);
+    margin: 14px 0 8px;
+    letter-spacing: 0.04em;
+  }
+  .lead {
+    font-size: clamp(15px, 3.6vw, 18px);
+    color: #8a5560;
+    margin-bottom: 34px;
+    text-align: center;
+  }
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    max-width: 430px;
+  }
+  a.card {
+    display: block;
+    text-decoration: none;
+    background: #ffffff;
+    border: 3px solid #ffb3c1;
+    border-radius: 22px;
+    padding: 22px 24px;
+    box-shadow: 0 6px 0 #ffd3dd;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  a.card:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #ffd3dd;
+  }
+  .card .name {
+    font-size: clamp(21px, 5vw, 26px);
+    font-weight: 700;
+    color: #d6336c;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card .desc {
+    margin-top: 8px;
+    font-size: clamp(14px, 3.4vw, 16px);
+    color: #7a4a54;
+    line-height: 1.6;
+  }
+  .card .go {
+    margin-top: 12px;
+    display: inline-block;
+    background: #ff5d8f;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 8px 20px;
+    border-radius: 999px;
+  }
+  footer {
+    margin-top: 40px;
+    font-size: 13px;
+    color: #b98a95;
+    text-align: center;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+  <div class="cherry">🍒</div>
+  <h1>さくらんぼ計算アプリ</h1>
+  <p class="lead">さくらんぼ計算で、たしざんとひきざんを練習しよう！<br>あそびたいほうをタッチしてね。</p>
+
+  <div class="cards">
+    <a class="card" href="tasizan/">
+      <div class="name">🍒 さくらんぼ たしざん</div>
+      <p class="desc">1けた＋1けたの、繰り上がりのある たしざん。<br>数をわけて「10」を作る練習ができます。</p>
+      <span class="go">あそぶ ▶</span>
+    </a>
+
+    <a class="card" href="hikizan/">
+      <div class="name">🍒 さくらんぼ ひきざん</div>
+      <p class="desc">2けた−1けたの、繰り下がりのある ひきざん。<br>10と一の位にわけて計算する練習ができます。</p>
+      <span class="go">あそぶ ▶</span>
+    </a>
+  </div>
+
+  <footer>タブレットでも スマートフォンでも あそべます。</footer>
+</body>
+</html>
