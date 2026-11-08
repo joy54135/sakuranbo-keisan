@@ -112,7 +112,7 @@
         padding: 4px 2px 0;
       }
       .progress-text {
-        font-size: clamp(15px, min(3.2vw, 2.8vh), 22px);
+        font-size: clamp(15px, min(3.2vw, 2.8dvh), 22px);
         font-weight: 800;
         color: var(--ink-soft);
         letter-spacing: 0.04em;
@@ -120,7 +120,7 @@
       }
       .progress-text b { color: var(--accent); font-size: 1.25em; }
       .cherries { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
-      .cherries svg { width: clamp(22px, min(5vw, 4vh), 34px); height: auto; display: block; }
+      .cherries svg { width: clamp(22px, min(5vw, 4dvh), 34px); height: auto; display: block; }
       .cherries.many { gap: 3px; max-width: 48vw; }
       .cherries.many svg { width: clamp(17px, 3.6vw, 25px); }
       .cherry .fruit { fill: var(--off); }
@@ -139,10 +139,10 @@
       /* ---------- play screen ---------- */
       .hint {
         text-align: center;
-        font-size: clamp(17px, min(4.2vw, 3.6vh), 27px);
+        font-size: clamp(17px, min(4.2vw, 3.6dvh), 27px);
         font-weight: 800;
         color: var(--ink);
-        margin: clamp(4px, 1vh, 12px) 0 0;
+        margin: clamp(4px, 1dvh, 12px) 0 0;
         line-height: 1.45;
         min-height: 2.9em;
         flex-shrink: 0;
@@ -154,7 +154,7 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding-top: clamp(2px, 0.8vh, 10px);
+        padding-top: clamp(2px, 0.8dvh, 10px);
         min-height: 0;
         position: relative;
       }
@@ -165,7 +165,7 @@
         gap: clamp(6px, 2vw, 20px);
       }
       .num, .op, .answer-slot {
-        font-size: clamp(46px, min(15.5vw, 13.5vh), 118px);
+        font-size: clamp(46px, min(15.5vw, 13.5dvh), 118px);
         font-weight: 800;
         line-height: 1.08;
         color: var(--ink);
@@ -225,7 +225,7 @@
          of its width, so the diagram starts near the screen's left edge
          and both boxes stay visible even on narrow phones */
       .sakura.sakura-a {
-        width: min(168px, 56vw, 30vh);
+        width: min(168px, 56vw, 30dvh);
         transform: translateX(-27%) scale(0.92);
       }
       .sakura.sakura-a.shown { transform: translateX(-27%) scale(1); }
@@ -234,7 +234,7 @@
         top: calc(100% + 2px);
         left: 50%;
         transform: translateX(-50%) scale(0.92);
-        width: min(208px, 62vw, 37vh);
+        width: min(208px, 62vw, 37dvh);
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
@@ -262,12 +262,12 @@
 
       .boxes { display: flex; justify-content: space-between; margin-top: 2px; }
       .box {
-        width: clamp(48px, min(15vw, 9.5vh), 76px);
-        height: clamp(48px, min(15vw, 9.5vh), 76px);
+        width: clamp(48px, min(15vw, 9.5dvh), 76px);
+        height: clamp(48px, min(15vw, 9.5dvh), 76px);
         background: var(--card);
         border: 4px solid var(--box-border);
         border-radius: 16px;
-        font-size: clamp(30px, min(9vw, 6.5vh), 50px);
+        font-size: clamp(30px, min(9vw, 6.5dvh), 50px);
         font-weight: 800;
         color: var(--accent-dark);
         display: flex;
@@ -346,7 +346,7 @@
       .ten-group.pop .ten-loop { animation: loop-pop 0.34s ease; }
       @keyframes loop-pop {
         0% { scale: 0.6; opacity: 0; }
-        60% { scale: 1.08; opacity: 1; }
+        60% { scale: 1.04; opacity: 1; }
         100% { scale: 1; opacity: 1; }
       }
       .ten-badge {
@@ -356,12 +356,23 @@
         border: 4px solid var(--accent);
         border-radius: 999px;
         color: var(--accent-dark);
-        font-size: clamp(30px, min(8vw, 6.5vh), 52px);
+        font-size: clamp(30px, min(8vw, 6.5dvh), 52px);
         font-weight: 800;
         line-height: 1.15;
         padding: 0 0.34em;
       }
-      .ten-group.pop .ten-badge { animation: num-pop 0.34s ease; }
+      .ten-group.pop .ten-badge { animation: badge-pop 0.34s ease; }
+      /* the badge pops through the `scale` property, never through
+         `transform`: a transform keyframe (like num-pop) replaces
+         the badge's translate(-50%, -50%) centring for the whole
+         animation, so the badge sat half its own size away from its
+         measured spot and then snapped into place when the pop
+         ended — the jump seen on phones */
+      @keyframes badge-pop {
+        0% { scale: 0.4; }
+        60% { scale: 1.1; }
+        100% { scale: 1; }
+      }
 
       /* ---------- counting blocks (textbook style) ----------
          yellow cubes under the equation, moving in step with the
@@ -379,7 +390,7 @@
          the need number is dragged over and the 10 is made, the
          ghosts disappear — the real need cubes have filled them */
       .blocks-panel {
-        --bs: clamp(30px, min(8.8vw, 6.2vh), 56px);
+        --bs: clamp(30px, min(8.8vw, 6.2dvh), 56px);
         background: var(--blocks-bg);
         border-radius: 20px;
         width: min(660px, 97vw);
@@ -389,7 +400,7 @@
       }
       .blocks-caption {
         text-align: center;
-        font-size: clamp(21px, min(5.6vw, 4vh), 32px);
+        font-size: clamp(21px, min(5.6vw, 4dvh), 32px);
         font-weight: 800;
         color: var(--ink);
         line-height: 1.35;
@@ -483,8 +494,8 @@
       /* feedback line */
       .feedback {
         text-align: center;
-        min-height: clamp(30px, 5.5vh, 48px);
-        font-size: clamp(21px, min(5.4vw, 4.2vh), 34px);
+        min-height: clamp(30px, 5.5dvh, 48px);
+        font-size: clamp(21px, min(5.4vw, 4.2dvh), 34px);
         flex-shrink: 0;
         font-weight: 800;
         display: flex;
@@ -493,7 +504,7 @@
         gap: 10px;
       }
       .feedback.good { color: var(--green); animation: fb-pop 0.28s ease; }
-      .feedback.try { color: var(--accent-dark); font-size: clamp(17px, min(4.4vw, 3.4vh), 27px); }
+      .feedback.try { color: var(--accent-dark); font-size: clamp(17px, min(4.4vw, 3.4dvh), 27px); }
       @keyframes fb-pop {
         0% { transform: scale(0.5); opacity: 0; }
         60% { transform: scale(1.15); opacity: 1; }
@@ -532,8 +543,8 @@
         border: 4px solid var(--pad-border);
         border-bottom-width: 6px;
         border-radius: 18px;
-        min-height: clamp(46px, 8.5vh, 72px);
-        font-size: clamp(26px, min(6vw, 5vh), 40px);
+        min-height: clamp(46px, 8.5dvh, 72px);
+        font-size: clamp(26px, min(6vw, 5dvh), 40px);
         font-weight: 800;
         color: var(--ink);
         transition: transform 0.05s ease, background 0.1s ease;
@@ -1334,8 +1345,33 @@
           return openSide === "A" ? el.numB : el.numA;
         }
 
+        // while the 10 is grouped, re-measure the loop on every
+        // animation frame, so it stays glued to the partner number
+        // and the need box: any later layout shift (the block cubes
+        // landing, the browser chrome resizing the visible area, a
+        // late font) is followed within a frame instead of leaving
+        // the loop sitting out of place until some one-off
+        // re-measure — and there is no single correction moment
+        // where it visibly jumps
+        var tenTrackRAF = 0;
+        function startTenTracking() {
+          if (tenTrackRAF) return;
+          var step = function () {
+            tenTrackRAF = 0;
+            if (!grouped) return;
+            positionTenGroup();
+            tenTrackRAF = requestAnimationFrame(step);
+          };
+          tenTrackRAF = requestAnimationFrame(step);
+        }
+        function stopTenTracking() {
+          if (tenTrackRAF) cancelAnimationFrame(tenTrackRAF);
+          tenTrackRAF = 0;
+        }
+
         function clearTenGroup() {
           grouped = false;
+          stopTenTracking();
           el.tenGroup.hidden = true;
           el.tenGroup.classList.remove("pop");
           if (blockFlightTimer) { clearTimeout(blockFlightTimer); blockFlightTimer = null; }
@@ -1352,8 +1388,20 @@
           }
         }
 
+        // keep a centre coordinate inside [0, extent] for a shape
+        // whose half-extent around that centre is `half`: slide the
+        // centre only as much as needed, and centre it outright
+        // when the shape is bigger than the space it lives in
+        function clampCenterIn(v, half, extent) {
+          if (extent <= half * 2 + 4) return extent / 2;
+          return Math.max(half + 2, Math.min(extent - half - 2, v));
+        }
+
         // draw the slanted loop around the partner number and the need box,
-        // measured from their real on-screen positions, badge beside it
+        // measured from their real on-screen positions, badge beside it.
+        // the loop's rotated outline is kept inside the stage, so on
+        // short screens it can never spill over the blocks panel and
+        // its caption below the stage
         function positionTenGroup() {
           var partner = partnerNumEl();
           var box = needBoxEl();
@@ -1371,8 +1419,18 @@
           var angle = Math.atan2(dy, dx);
           var mx = (x1 + x2) / 2;
           var my = (y1 + y2) / 2;
-          var loopH = Math.max(pr.height * 0.84, br.height + 28);
-          var loopW = dist + Math.max(pr.width, br.width) * 0.8 + 38;
+          var loopH = Math.max(pr.height * 0.84, br.height + 24);
+          var loopW = dist + Math.max(pr.width, br.width) * 0.75 + 32;
+          // the rotated capsule's axis-aligned half-extents: keep
+          // the whole outline inside the stage (it used to reach
+          // ~25px below the need box, over the caption, whenever
+          // the stage was short)
+          var cosA = Math.abs(Math.cos(angle));
+          var sinA = Math.abs(Math.sin(angle));
+          var ex = (loopW / 2) * cosA + (loopH / 2) * sinA;
+          var ey = (loopW / 2) * sinA + (loopH / 2) * cosA;
+          mx = clampCenterIn(mx, ex, stageRect.width);
+          my = clampCenterIn(my, ey, stageRect.height);
           el.tenLoop.style.width = loopW + "px";
           el.tenLoop.style.height = loopH + "px";
           el.tenLoop.style.left = mx + "px";
@@ -1394,8 +1452,12 @@
           var off = loopH / 2 + 40;
           var bx = mx + px * off;
           var by = my + py * off;
-          bx = Math.max(46, Math.min(stageRect.width - 46, bx));
-          by = Math.max(34, Math.min(stageRect.height - 34, by));
+          // clamp by the badge's real size, not a fixed margin, so
+          // it stays fully inside the stage at any font size
+          var bw = el.tenBadge.offsetWidth || 92;
+          var bh = el.tenBadge.offsetHeight || 48;
+          bx = clampCenterIn(bx, bw / 2, stageRect.width);
+          by = clampCenterIn(by, bh / 2, stageRect.height);
           el.tenBadge.style.left = bx + "px";
           el.tenBadge.style.top = by + "px";
         }
@@ -1438,6 +1500,7 @@
           el.tenGroup.classList.remove("pop");
           void el.tenGroup.offsetWidth; // restart the pop animation
           el.tenGroup.classList.add("pop");
+          startTenTracking();
           if (!blockJoining) return;
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
@@ -1547,11 +1610,9 @@
               requestAnimationFrame(function () {
                 showTenGroup();
                 updateSplitHint();
-                // re-measure once any late layout shift has settled,
-                // so the two numbers stay enclosed no matter what
-                setTimeout(function () {
-                  if (grouped) positionTenGroup();
-                }, 180);
+                // from here the tracking loop in showTenGroup keeps
+                // re-measuring every frame, so the two numbers stay
+                // enclosed no matter what shifts the layout later
               });
             });
           } else {

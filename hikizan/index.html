@@ -382,9 +382,27 @@
         cursor: pointer;
       }
       .ten-badge.empty:active { transform: translate(-50%, -50%) scale(0.92); }
-      .ten-group.pop .ten-badge { animation: num-pop 0.34s ease; }
+      /* the badge is centred on its left/top point by
+         transform: translate(-50%, -50%). Its pop / wiggle must
+         therefore NOT animate `transform` (the old num-pop /
+         box-wiggle keyframes did, which knocked the badge half its
+         own size off its anchor and made it jump whenever the
+         animation set changed, e.g. when the number was revealed).
+         Animate the independent scale / rotate properties instead:
+         they compose with the centring transform and the badge
+         stays exactly where it was placed */
+      .ten-group.pop .ten-badge { animation: badge-pop 0.34s ease; }
       .ten-group.pop .ten-badge.empty {
-        animation: num-pop 0.34s ease, box-wiggle 1.1s ease-in-out 0.45s infinite;
+        animation: badge-pop 0.34s ease, badge-wiggle 1.1s ease-in-out 0.45s infinite;
+      }
+      @keyframes badge-pop {
+        0% { scale: 0.4; }
+        60% { scale: 1.18; }
+        100% { scale: 1; }
+      }
+      @keyframes badge-wiggle {
+        0%, 100% { scale: 1; rotate: 0deg; }
+        50% { scale: 1.06; rotate: -1.5deg; }
       }
 
       /* ---------- counting blocks (textbook style) ----------
@@ -1334,7 +1352,19 @@
         }
 
         // draw the slanted loop around the partner number and the need box,
-        // measured from their real on-screen positions, badge under the 10 box
+        // measured from their real on-screen positions, badge under the 10 box.
+        // The measurement must give the SAME answer whenever it runs:
+        // centres come from getBoundingClientRect (a CSS scale is
+        // centred, so a rect centre stays put even mid-animation),
+        // but the SIZES come from offsetWidth / offsetHeight, which
+        // report the plain layout size. Reading sizes from the rect
+        // instead picked up whatever transform happened to be
+        // mid-flight at that moment — the partner number still
+        // shrinking back from its drop-hint scale, the dragged box
+        // still settling — so every re-measure (the late timer, the
+        // ResizeObserver firing when the badge was tapped, …) drew
+        // the loop a little longer or shorter and it visibly
+        // shifted around the two numbers it encloses
         function positionTenGroup() {
           var partner = partnerNumEl();
           var box = needBoxEl();
@@ -1342,6 +1372,10 @@
           var stageRect = el.stage.getBoundingClientRect();
           var pr = partner.getBoundingClientRect();
           var br = box.getBoundingClientRect();
+          var pw = partner.offsetWidth;
+          var ph = partner.offsetHeight;
+          var bw = box.offsetWidth;
+          var bh = box.offsetHeight;
           var x1 = pr.left + pr.width / 2 - stageRect.left;
           var y1 = pr.top + pr.height / 2 - stageRect.top;
           var x2 = br.left + br.width / 2 - stageRect.left;
@@ -1352,8 +1386,8 @@
           var angle = Math.atan2(dy, dx);
           var mx = (x1 + x2) / 2;
           var my = (y1 + y2) / 2;
-          var loopH = Math.max(pr.height * 0.82, br.height + 24);
-          var loopW = dist + Math.max(pr.width, br.width) * 0.8 + 38;
+          var loopH = Math.max(ph * 0.82, bh + 24);
+          var loopW = dist + Math.max(pw, bw) * 0.8 + 38;
           el.tenLoop.style.width = loopW + "px";
           el.tenLoop.style.height = loopH + "px";
           el.tenLoop.style.left = mx + "px";
@@ -1364,7 +1398,7 @@
           // is left of the 10: 10 − b, written just below the 10
           // the way the textbook writes it
           var bx = x2;
-          var by = y2 + br.height / 2 + 50;
+          var by = y2 + bh / 2 + 50;
           bx = Math.max(46, Math.min(stageRect.width - 46, bx));
           by = Math.max(34, by);
           el.tenBadge.style.left = bx + "px";
@@ -1470,11 +1504,10 @@
               requestAnimationFrame(function () {
                 showTenGroup();
                 updateSplitHint();
-                // re-measure once any late layout shift has settled,
-                // so the two numbers stay enclosed no matter what
-                setTimeout(function () {
-                  if (grouped) positionTenGroup();
-                }, 180);
+                // no late "corrective" re-measure: positionTenGroup
+                // reads layout sizes, so the geometry it computes
+                // now is already the final one and the loop does
+                // not jump again a moment later
               });
             });
           } else {
