@@ -379,28 +379,29 @@
          the need number is dragged over and the 10 is made, the
          ghosts disappear — the real need cubes have filled them */
       .blocks-panel {
-        --bs: clamp(20px, min(6.2vw, 4.4vh), 36px);
+        --bs: clamp(30px, min(8.8vw, 6.2vh), 56px);
         background: var(--blocks-bg);
-        border-radius: 18px;
-        width: min(580px, 96vw);
+        border-radius: 20px;
+        width: min(660px, 97vw);
         margin: 0 auto 2px;
-        padding: 7px 10px 10px;
+        padding: 10px 12px 12px;
         flex-shrink: 0;
       }
       .blocks-caption {
         text-align: center;
-        font-size: clamp(14px, min(3.6vw, 2.6vh), 20px);
+        font-size: clamp(21px, min(5.6vw, 4vh), 32px);
         font-weight: 800;
         color: var(--ink);
+        line-height: 1.35;
         min-height: 1.4em;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
       }
       .blocks-caption .hl { color: var(--accent); }
       .blocks-caption .hl-b { color: var(--rest); }
       .blocks-flow {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 5px;
         width: calc(var(--bs) * 10);
         max-width: 100%;
         margin: 0 auto;
@@ -414,8 +415,8 @@
         width: var(--bs);
         height: var(--bs);
         flex: 0 0 auto;
-        border-radius: 7px;
-        border: 2px solid var(--block-edge);
+        border-radius: 9px;
+        border: 2.5px solid var(--block-edge);
         background: linear-gradient(180deg, #ffe066 0%, #ffc93c 55%, #f6ac1e 100%);
         box-shadow:
           inset 0 3px 0 rgba(255, 255, 255, 0.55),
@@ -431,7 +432,7 @@
          needs to make 10, drawn to the right of its solid cubes */
       .block-cube.is-ghost {
         background: var(--ghost-bg);
-        border: 2px dashed var(--ghost-edge);
+        border: 2.5px dashed var(--ghost-edge);
         box-shadow: none;
         animation: ghost-in 0.3s ease;
       }
@@ -458,14 +459,14 @@
          they arrive, and keep the ghost targets steady */
       .blocks-panel.is-joining .block-cube { animation: none; }
       .block-cube.is-ghost.ghost-target { animation: none; }
-      .block-cube.hl-ten { outline: 3px solid var(--accent); outline-offset: 1px; }
-      .block-cube.hl-ones { outline: 3px solid var(--rest); outline-offset: 1px; }
+      .block-cube.hl-ten { outline: 4px solid var(--accent); outline-offset: 1px; }
+      .block-cube.hl-ones { outline: 4px solid var(--rest); outline-offset: 1px; }
       .blocks-panel.is-dragging .block-cube.is-need { animation: block-wiggle 0.7s ease-in-out infinite; }
       @keyframes block-wiggle {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-4px); }
       }
-      .block-cube.final { outline: 3px solid var(--green); outline-offset: 1px; }
+      .block-cube.final { outline: 4px solid var(--green); outline-offset: 1px; }
       .blocks-panel.is-joined .block-cube { animation: block-pop 0.35s ease; }
       @keyframes block-pop {
         0% { scale: 0.6; }
@@ -747,8 +748,8 @@
         .app { padding-top: max(4px, env(safe-area-inset-top)); padding-bottom: max(6px, env(safe-area-inset-bottom)); }
         .topbar { padding-top: 0; }
         .hint { min-height: 2.9em; margin-top: 2px; }
-        .blocks-panel { padding: 5px 8px 7px; }
-        .blocks-caption { margin-bottom: 4px; }
+        .blocks-panel { padding: 7px 10px 9px; }
+        .blocks-caption { margin-bottom: 6px; }
         .pad button { border-bottom-width: 4px; }
       }
       @media (max-height: 480px) {
