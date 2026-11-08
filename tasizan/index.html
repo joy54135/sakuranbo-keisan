@@ -1,0 +1,1830 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>さくらんぼ たしざん</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #fff8f3;
+        --ink: #33241f;
+        --ink-soft: #7a655c;
+        --accent: #e0342b;
+        --accent-dark: #b92318;
+        --accent-soft: #ffe3de;
+        --green: #2f9e4f;
+        --green-soft: #e0f4e4;
+        --leaf: #3d9b4f;
+        --card: #ffffff;
+        --line: #33241f;
+        --pad-bg: #ffffff;
+        --pad-border: #f0cfc4;
+        --pad-shadow: #e8c9bc;
+        --box-border: #33241f;
+        --off: #e9ded8;
+        --off-stroke: #cbbcb3;
+        --rest: #1d6fd1;
+        --rest-soft: #dfeefc;
+        --blocks-bg: #dff1fa;
+        --block-edge: #dd9d00;
+        --ghost-bg: rgba(224, 52, 43, 0.06);
+        --ghost-edge: rgba(224, 52, 43, 0.55);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #241d1b;
+          --ink: #f7ece5;
+          --ink-soft: #c4a99d;
+          --accent: #ff6a5e;
+          --accent-dark: #ff8a7e;
+          --accent-soft: #4a2622;
+          --green: #5cc977;
+          --green-soft: #274433;
+          --leaf: #5cc977;
+          --card: #322825;
+          --line: #f7ece5;
+          --pad-bg: #322825;
+          --pad-border: #59443c;
+          --pad-shadow: #171211;
+          --box-border: #f7ece5;
+          --off: #453833;
+          --off-stroke: #6b554b;
+          --rest: #6db3ff;
+          --rest-soft: #22384f;
+          --blocks-bg: #26333d;
+          --block-edge: #c78f00;
+          --ghost-bg: rgba(255, 106, 94, 0.1);
+          --ghost-edge: rgba(255, 106, 94, 0.65);
+        }
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Hiragino Sans",
+          "Noto Sans JP", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        overflow-x: hidden;
+      }
+      button { font-family: inherit; cursor: pointer; }
+
+      .app {
+        max-width: 920px;
+        margin: 0 auto;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        padding: max(14px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+      }
+
+      /* ---------- top bar ---------- */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 4px 2px 0;
+      }
+      .progress-text {
+        font-size: clamp(17px, 3.4vw, 24px);
+        font-weight: 800;
+        color: var(--ink-soft);
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+      }
+      .progress-text b { color: var(--accent); font-size: 1.25em; }
+      .cherries { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+      .cherries svg { width: clamp(26px, 5.4vw, 38px); height: auto; display: block; }
+      .cherries.many { gap: 3px; max-width: 48vw; }
+      .cherries.many svg { width: clamp(17px, 3.6vw, 25px); }
+      .cherry .fruit { fill: var(--off); }
+      .cherry .stem, .cherry .leaf { stroke: var(--off-stroke); }
+      .cherry .leaf { fill: none; }
+      .cherry.on .fruit { fill: var(--accent); }
+      .cherry.on .stem { stroke: var(--leaf); }
+      .cherry.on .leaf { stroke: var(--leaf); fill: var(--leaf); }
+      .cherry.pop { animation: cherry-pop 0.28s ease; }
+      @keyframes cherry-pop {
+        0% { transform: scale(0.4); }
+        60% { transform: scale(1.25); }
+        100% { transform: scale(1); }
+      }
+
+      /* ---------- play screen ---------- */
+      .hint {
+        text-align: center;
+        font-size: clamp(19px, 4.4vw, 30px);
+        font-weight: 800;
+        color: var(--ink);
+        margin: clamp(14px, 3.5vh, 30px) 0 0;
+        min-height: 1.5em;
+      }
+      .hint .hl { color: var(--accent); }
+
+      .stage {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: clamp(10px, 3vh, 34px);
+        min-height: clamp(300px, 46vh, 430px);
+        position: relative;
+      }
+      .equation {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: clamp(6px, 2vw, 20px);
+      }
+      .num, .op, .answer-slot {
+        font-size: clamp(74px, 17vw, 148px);
+        font-weight: 800;
+        line-height: 1.1;
+        color: var(--ink);
+      }
+      .op { padding: 0 0.02em; }
+      button.num {
+        background: none;
+        border: none;
+        padding: 0 0.04em;
+        margin: 0 -0.04em;
+        position: relative;
+        border-radius: 24px;
+        color: var(--ink);
+      }
+      button.num.tappable { color: var(--accent-dark); }
+      button.num.tappable::after {
+        content: "";
+        position: absolute;
+        inset: -6px -2px;
+        border: 4px dashed var(--accent);
+        border-radius: 26px;
+        opacity: 0.85;
+        animation: ring-pulse 0.85s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes ring-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.07); opacity: 0.45; }
+      }
+      button.num.opened { color: var(--ink); }
+      button.num.opened::after { display: none; }
+
+      .answer-slot {
+        min-width: 1.55em;
+        text-align: center;
+        color: var(--ink-soft);
+        background: var(--card);
+        border: 5px solid var(--pad-border);
+        border-radius: 26px;
+        padding: 0 0.08em;
+      }
+      .answer-slot.filled {
+        color: var(--green);
+        border-color: var(--green);
+        background: var(--green-soft);
+        animation: slot-pop 0.3s ease;
+      }
+      @keyframes slot-pop {
+        0% { transform: scale(0.6); }
+        60% { transform: scale(1.12); }
+        100% { transform: scale(1); }
+      }
+
+      /* sakuranbo diagram, hanging under either number */
+      .split-wrap { position: relative; display: inline-block; }
+      /* the front number's sakuranbo leans right: its apex sits at 27%
+         of its width, so the diagram starts near the screen's left edge
+         and both boxes stay visible even on narrow phones */
+      .sakura.sakura-a {
+        width: min(200px, 56vw);
+        transform: translateX(-27%) scale(0.92);
+      }
+      .sakura.sakura-a.shown { transform: translateX(-27%) scale(1); }
+      .sakura {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 50%;
+        transform: translateX(-50%) scale(0.92);
+        width: min(248px, 62vw);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+        pointer-events: none;
+        z-index: 3;
+      }
+      .sakura.shown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) scale(1);
+        pointer-events: auto;
+      }
+      .sakura svg { display: block; width: 100%; height: auto; overflow: visible; }
+      .sakura .branch {
+        stroke: var(--line);
+        stroke-width: 5;
+        stroke-linecap: round;
+        fill: none;
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+      }
+      .sakura.shown .branch { animation: draw 0.26s ease forwards; }
+      .sakura.shown .branch.r { animation-delay: 0.06s; }
+      @keyframes draw { to { stroke-dashoffset: 0; } }
+
+      .boxes { display: flex; justify-content: space-between; margin-top: 2px; }
+      .box {
+        width: clamp(66px, 17vw, 84px);
+        height: clamp(66px, 17vw, 84px);
+        background: var(--card);
+        border: 5px solid var(--box-border);
+        border-radius: 18px;
+        font-size: clamp(40px, 10vw, 56px);
+        font-weight: 800;
+        color: var(--accent-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      .sakura.shown .box { animation: box-in 0.2s ease forwards; }
+      .sakura.shown .box.r { animation-delay: 0.12s; }
+      @keyframes box-in { to { opacity: 1; transform: scale(1); } }
+      .sakura.shown .box:not(.revealed) { animation: box-in 0.2s ease forwards, box-wiggle 1.1s ease-in-out 0.3s infinite; }
+      .sakura.shown .box.r:not(.revealed) { animation: box-in 0.2s ease 0.12s forwards, box-wiggle 1.1s ease-in-out 0.42s infinite; }
+      @keyframes box-wiggle {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.06) rotate(-1.5deg); }
+      }
+      .sakura.shown .box.revealed {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        opacity: 1;
+        transform: scale(1);
+        animation: num-pop 0.26s ease;
+      }
+      /* the number that makes 10 with the partner: red.
+         the leftover number: blue, frame and digit alike */
+      .sakura.shown .box.revealed.need {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+      }
+      .sakura.shown .box.revealed.rest {
+        border-color: var(--rest);
+        background: var(--rest-soft);
+        color: var(--rest);
+      }
+      @keyframes num-pop {
+        0% { transform: scale(0.4); }
+        60% { transform: scale(1.18); }
+        100% { transform: scale(1); }
+      }
+
+      /* the "make 10" number can be dragged onto its partner */
+      .sakura.shown .box.revealed.need.draggable {
+        cursor: grab;
+        touch-action: none;
+        animation: num-pop 0.26s ease, need-pulse 1.15s ease-in-out 0.3s infinite;
+      }
+      @keyframes need-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(224, 52, 43, 0.4); }
+        50% { box-shadow: 0 0 0 11px rgba(224, 52, 43, 0); }
+      }
+      .box.dragging {
+        cursor: grabbing;
+        position: relative;
+        box-shadow: 0 14px 28px rgba(51, 36, 31, 0.3);
+        opacity: 0.95;
+      }
+      button.num { transition: transform 0.12s ease, color 0.12s ease; }
+      button.num.drop-hint { color: var(--accent); transform: scale(1.1); }
+
+      /* loop drawn around the partner and the dragged number, with a 10 badge */
+      .ten-group {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6;
+      }
+      .ten-loop {
+        position: absolute;
+        border: 6px solid var(--accent);
+        border-radius: 999px;
+        background: transparent;
+      }
+      .ten-group.pop .ten-loop { animation: loop-pop 0.34s ease; }
+      @keyframes loop-pop {
+        0% { scale: 0.6; opacity: 0; }
+        60% { scale: 1.08; opacity: 1; }
+        100% { scale: 1; opacity: 1; }
+      }
+      .ten-badge {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        background: var(--card);
+        border: 5px solid var(--accent);
+        border-radius: 999px;
+        color: var(--accent-dark);
+        font-size: clamp(38px, 9vw, 60px);
+        font-weight: 800;
+        line-height: 1.15;
+        padding: 0 0.34em;
+      }
+      .ten-group.pop .ten-badge { animation: num-pop 0.34s ease; }
+
+      /* ---------- counting blocks (textbook style) ----------
+         yellow cubes under the equation, moving in step with the
+         sakuranbo: the front number is always the top row and the
+         back number is always the bottom row, and the solid cubes
+         never change rows or positions when a number is tapped —
+         opening a split only recolours the split number's cubes
+         (need / rest) in place, by their coloured outlines. The
+         flow is always exactly ten cubes wide, so not even the
+         panel centring can shift a cube. Cubes inside a row touch
+         with no gap between them. When a split opens, transparent
+         "ghost" cubes appear to the right of the partner (the
+         number that was not tapped): as many as the partner still
+         needs to reach 10, so the child can count the gap. Once
+         the need number is dragged over and the 10 is made, the
+         ghosts disappear — the real need cubes have filled them */
+      .blocks-panel {
+        --bs: clamp(25px, 6.4vw, 40px);
+        background: var(--blocks-bg);
+        border-radius: 20px;
+        width: min(580px, 96vw);
+        margin: 2px auto 6px;
+        padding: 10px 12px 16px;
+      }
+      .blocks-caption {
+        text-align: center;
+        font-size: clamp(15px, 3.8vw, 21px);
+        font-weight: 800;
+        color: var(--ink);
+        min-height: 1.45em;
+        margin-bottom: 9px;
+      }
+      .blocks-caption .hl { color: var(--accent); }
+      .blocks-caption .hl-b { color: var(--rest); }
+      .blocks-flow {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        width: calc(var(--bs) * 10);
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      .blocks-row {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0;
+      }
+      .block-cube {
+        width: var(--bs);
+        height: var(--bs);
+        flex: 0 0 auto;
+        border-radius: 7px;
+        border: 2px solid var(--block-edge);
+        background: linear-gradient(180deg, #ffe066 0%, #ffc93c 55%, #f6ac1e 100%);
+        box-shadow:
+          inset 0 3px 0 rgba(255, 255, 255, 0.55),
+          inset 0 -5px 0 rgba(178, 118, 0, 0.35),
+          0 4px 0 #a8adb3;
+        transition:
+          transform 0.45s ease,
+          opacity 0.45s ease,
+          margin 0.45s ease,
+          outline-color 0.2s ease;
+      }
+      /* transparent placeholder cubes: how many more the partner
+         needs to make 10, drawn to the right of its solid cubes */
+      .block-cube.is-ghost {
+        background: var(--ghost-bg);
+        border: 2px dashed var(--ghost-edge);
+        box-shadow: none;
+        animation: ghost-in 0.3s ease;
+      }
+      .block-cube.is-ghost.ghost-gone { display: none; }
+      @keyframes ghost-in {
+        0% { opacity: 0; transform: scale(0.6); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      /* cubes that fly from the split number's row onto the
+         partner's ghost cubes when the 10 is made: they travel
+         over the panel and land exactly on the ghost spots, so
+         the partner's cubes and these cubes visibly join into
+         one row of 10 */
+      .block-cube.is-flying {
+        position: relative;
+        z-index: 6;
+        transition: transform 0.68s cubic-bezier(0.25, 0.9, 0.3, 1);
+        box-shadow:
+          inset 0 3px 0 rgba(255, 255, 255, 0.55),
+          inset 0 -5px 0 rgba(178, 118, 0, 0.35),
+          0 10px 14px rgba(51, 36, 31, 0.28);
+      }
+      /* while the cubes are flying, hold the landing pop until
+         they arrive, and keep the ghost targets steady */
+      .blocks-panel.is-joining .block-cube { animation: none; }
+      .block-cube.is-ghost.ghost-target { animation: none; }
+      .block-cube.hl-ten { outline: 3px solid var(--accent); outline-offset: 1px; }
+      .block-cube.hl-ones { outline: 3px solid var(--rest); outline-offset: 1px; }
+      .blocks-panel.is-dragging .block-cube.is-need { animation: block-wiggle 0.7s ease-in-out infinite; }
+      @keyframes block-wiggle {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+      .block-cube.final { outline: 3px solid var(--green); outline-offset: 1px; }
+      .blocks-panel.is-joined .block-cube { animation: block-pop 0.35s ease; }
+      @keyframes block-pop {
+        0% { scale: 0.6; }
+        60% { scale: 1.15; }
+        100% { scale: 1; }
+      }
+      .blocks-panel.is-done .block-cube { animation: block-bounce 0.55s ease; }
+      @keyframes block-bounce {
+        0%, 100% { transform: translateY(0); }
+        35% { transform: translateY(-10px); }
+        70% { transform: translateY(2px); }
+      }
+
+      /* feedback line */
+      .feedback {
+        text-align: center;
+        min-height: clamp(44px, 8vh, 64px);
+        font-size: clamp(26px, 6vw, 42px);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .feedback.good { color: var(--green); animation: fb-pop 0.28s ease; }
+      .feedback.try { color: var(--accent-dark); font-size: clamp(20px, 4.6vw, 30px); }
+      @keyframes fb-pop {
+        0% { transform: scale(0.5); opacity: 0; }
+        60% { transform: scale(1.15); opacity: 1; }
+        100% { transform: scale(1); }
+      }
+      .star-burst { position: relative; width: 0; height: 0; }
+      .star-burst svg {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        left: -15px;
+        top: -15px;
+        fill: #f7b731;
+        stroke: #e39a00;
+        stroke-width: 1.5;
+        animation: burst 0.55s ease-out forwards;
+      }
+      @keyframes burst {
+        0% { transform: translate(0, 0) scale(0.3) rotate(0deg); opacity: 1; }
+        100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(160deg); opacity: 0; }
+      }
+
+      /* ---------- answer pad ---------- */
+      .pad {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: clamp(10px, 2.4vw, 16px);
+        padding-bottom: 4px;
+      }
+      @media (min-width: 760px) {
+        .pad { grid-template-columns: repeat(8, 1fr); }
+      }
+      .pad button {
+        background: var(--pad-bg);
+        border: 4px solid var(--pad-border);
+        border-bottom-width: 7px;
+        border-radius: 20px;
+        min-height: clamp(64px, 11vh, 92px);
+        font-size: clamp(30px, 6.4vw, 44px);
+        font-weight: 800;
+        color: var(--ink);
+        transition: transform 0.05s ease, background 0.1s ease;
+      }
+      .pad button:active { transform: translateY(3px) scale(0.97); }
+      .pad button.wrong {
+        background: var(--off);
+        border-color: var(--off-stroke);
+        color: var(--ink-soft);
+        opacity: 0.55;
+        animation: shake 0.28s ease;
+        pointer-events: none;
+      }
+      .pad button.correct {
+        background: var(--green-soft);
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .pad button:disabled { cursor: default; }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-7px); }
+        75% { transform: translateX(7px); }
+      }
+
+      /* ---------- title screen ---------- */
+      .title-screen {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-top: clamp(18px, 6vh, 56px);
+      }
+      .title-screen .title-cherries { display: flex; gap: 10px; margin-bottom: 4px; }
+      .title-screen .title-cherries svg { width: clamp(64px, 15vw, 96px); height: auto; display: block; }
+      .title-name {
+        font-size: clamp(40px, 10vw, 72px);
+        font-weight: 800;
+        margin: 4px 0 6px;
+        color: var(--accent-dark);
+        line-height: 1.25;
+      }
+      .title-lead {
+        font-size: clamp(18px, 4.6vw, 26px);
+        font-weight: 800;
+        margin: 0 0 28px;
+      }
+      .count-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        width: min(440px, 92vw);
+      }
+      .count-row { display: flex; align-items: center; gap: 16px; }
+      .count-btn {
+        flex: 0 0 auto;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-bottom: 7px solid var(--accent-dark);
+        border-radius: 999px;
+        font-size: clamp(26px, 6.4vw, 36px);
+        font-weight: 800;
+        padding: 14px 38px;
+        min-width: 3.9em;
+        transition: transform 0.08s ease;
+      }
+      .count-btn:active { transform: translateY(4px); border-bottom-width: 3px; }
+      .best-box { text-align: left; }
+      .best-label {
+        display: block;
+        font-size: clamp(13px, 3.4vw, 16px);
+        font-weight: 800;
+        color: var(--ink-soft);
+        letter-spacing: 0.05em;
+      }
+      .best-time {
+        display: block;
+        font-size: clamp(21px, 5.2vw, 29px);
+        font-weight: 800;
+        color: var(--rest);
+        white-space: nowrap;
+      }
+      .best-time.none { color: var(--ink-soft); font-size: clamp(16px, 4.2vw, 21px); }
+
+      /* ---------- result screen ---------- */
+      .result {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-top: clamp(10px, 4vh, 40px);
+        position: relative;
+      }
+      .result .big-cherries { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; max-width: 92vw; }
+      .result .big-cherries svg { width: clamp(46px, 11vw, 68px); height: auto; }
+      .result .big-cherries.many { gap: 5px; }
+      .result .big-cherries.many svg { width: clamp(26px, 6vw, 38px); }
+      .result h1 {
+        font-size: clamp(34px, 8.4vw, 58px);
+        font-weight: 800;
+        margin: 6px 0 4px;
+        color: var(--accent-dark);
+      }
+      .result .score-line {
+        font-size: clamp(20px, 5vw, 30px);
+        font-weight: 800;
+        margin: 0 0 8px;
+      }
+      .result .score-line b { color: var(--accent); font-size: 1.3em; }
+      .result .time-line {
+        font-size: clamp(19px, 4.8vw, 27px);
+        font-weight: 800;
+        margin: 0 0 4px;
+      }
+      .result .time-line b { color: var(--rest); font-size: 1.2em; }
+      .result .best-note {
+        font-size: clamp(16px, 4.2vw, 22px);
+        font-weight: 800;
+        color: var(--accent-dark);
+        margin: 0 0 10px;
+        min-height: 1.4em;
+      }
+      .result-btns { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      .title-btn {
+        background: var(--card);
+        color: var(--ink);
+        border: 4px solid var(--pad-border);
+        border-bottom-width: 7px;
+        border-radius: 999px;
+        font-size: clamp(19px, 4.8vw, 26px);
+        font-weight: 800;
+        padding: 12px 38px;
+        transition: transform 0.08s ease;
+      }
+      .title-btn:active { transform: translateY(3px); border-bottom-width: 3px; }
+      .result .message {
+        font-size: clamp(17px, 4.4vw, 25px);
+        font-weight: 700;
+        line-height: 1.6;
+        color: var(--ink);
+        margin: 0 0 22px;
+        max-width: 34em;
+      }
+      .review {
+        list-style: none;
+        margin: 0 0 8px;
+        padding: 14px 20px;
+        background: var(--card);
+        border: 3px solid var(--pad-border);
+        border-radius: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-width: min(340px, 84vw);
+      }
+      .review li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        font-size: clamp(20px, 5vw, 27px);
+        font-weight: 800;
+            }
+      .review .mark { font-size: 1.05em; }
+      .review .mark.first { color: var(--accent); }
+      .review .mark.retry { color: var(--green); }
+      .legend {
+        font-size: clamp(13px, 3.4vw, 16px);
+        font-weight: 700;
+        color: var(--ink-soft);
+        margin: 0 0 26px;
+      }
+      .again-btn {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-bottom: 7px solid var(--accent-dark);
+        border-radius: 999px;
+        font-size: clamp(24px, 6vw, 34px);
+        font-weight: 800;
+        padding: 16px 52px;
+        letter-spacing: 0.03em;
+        transition: transform 0.08s ease;
+      }
+      .again-btn:active { transform: translateY(4px); border-bottom-width: 3px; }
+      .fall-star {
+        position: absolute;
+        top: -40px;
+        pointer-events: none;
+        animation: fall linear forwards;
+      }
+      .fall-star svg { display: block; }
+      @keyframes fall {
+        to { transform: translateY(105dvh) rotate(320deg); }
+      }
+
+      [hidden] { display: none !important; }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        .sakura .branch { stroke-dashoffset: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar" id="topbar" hidden>
+        <div class="progress-text" id="progressText"></div>
+        <div class="cherries" id="progressCherries" aria-hidden="true"></div>
+      </header>
+
+      <!-- ======== title screen ======== -->
+      <section id="titleScreen" class="title-screen">
+        <div class="title-cherries" id="titleCherries" aria-hidden="true"></div>
+        <h1 class="title-name">さくらんぼ たしざん</h1>
+        <p class="title-lead">なんもん あそぶ？ タッチで スタート！</p>
+        <div class="count-list">
+          <div class="count-row">
+            <button type="button" class="count-btn" data-count="5">5もん</button>
+            <div class="best-box">
+              <span class="best-label">ベストタイム</span>
+              <span class="best-time none" id="best5">まだ ない。</span>
+            </div>
+          </div>
+          <div class="count-row">
+            <button type="button" class="count-btn" data-count="10">10もん</button>
+            <div class="best-box">
+              <span class="best-label">ベストタイム</span>
+              <span class="best-time none" id="best10">まだ ない。</span>
+            </div>
+          </div>
+          <div class="count-row">
+            <button type="button" class="count-btn" data-count="20">20もん</button>
+            <div class="best-box">
+              <span class="best-label">ベストタイム</span>
+              <span class="best-time none" id="best20">まだ ない。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== play screen ======== -->
+      <section id="playScreen" hidden>
+        <p class="hint" id="hint"></p>
+
+        <div class="stage" id="stage">
+          <div class="equation" id="equation">
+            <span class="split-wrap">
+              <button type="button" class="num tappable" id="numA" aria-label="まえの かずを タッチして さくらんぼに する">9</button>
+              <div class="sakura sakura-a" id="sakuraA">
+                <svg viewBox="0 0 200 96" aria-hidden="true">
+                  <path class="branch l" pathLength="100" d="M54 4 L33 92" />
+                  <path class="branch r" pathLength="100" d="M54 4 L167 92" />
+                </svg>
+                <div class="boxes">
+                  <button type="button" class="box l" id="boxAL" aria-label="まえの かずの ひだりの しかく"></button>
+                  <button type="button" class="box r" id="boxAR" aria-label="まえの かずの みぎの しかく"></button>
+                </div>
+              </div>
+            </span>
+            <span class="op">+</span>
+            <span class="split-wrap">
+              <button type="button" class="num tappable" id="numB" aria-label="うしろの かずを タッチして さくらんぼに する">4</button>
+              <div class="sakura sakura-b" id="sakuraB">
+                <svg viewBox="0 0 248 96" aria-hidden="true">
+                  <path class="branch l" pathLength="100" d="M124 4 L42 92" />
+                  <path class="branch r" pathLength="100" d="M124 4 L206 92" />
+                </svg>
+                <div class="boxes">
+                  <button type="button" class="box l" id="boxBL" aria-label="うしろの かずの ひだりの しかく"></button>
+                  <button type="button" class="box r" id="boxBR" aria-label="うしろの かずの みぎの しかく"></button>
+                </div>
+              </div>
+            </span>
+            <span class="op">=</span>
+            <span class="answer-slot" id="answerSlot">？</span>
+          </div>
+          <div class="ten-group" id="tenGroup" hidden aria-hidden="true">
+            <div class="ten-loop" id="tenLoop"></div>
+            <div class="ten-badge" id="tenBadge">10</div>
+          </div>
+        </div>
+
+        <div class="blocks-panel" id="blocksPanel" aria-hidden="true">
+          <div class="blocks-caption" id="blocksCaption"></div>
+          <div class="blocks-flow" id="blocksFlow"></div>
+        </div>
+
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+
+        <div class="pad" id="pad" role="group" aria-label="こたえの かず"></div>
+      </section>
+
+      <!-- ======== result screen ======== -->
+      <section id="resultScreen" class="result" hidden>
+        <div class="big-cherries" id="bigCherries" aria-hidden="true"></div>
+        <h1 id="resultTitle"></h1>
+        <p class="score-line" id="scoreLine"></p>
+        <p class="time-line" id="timeLine"></p>
+        <p class="best-note" id="bestNote"></p>
+        <p class="message" id="resultMessage"></p>
+        <ul class="review" id="review"></ul>
+        <p class="legend">◎ ひとりで できた。　　○ がんばって できた。</p>
+        <div class="result-btns">
+          <button type="button" class="again-btn" id="againBtn">もういちど あそぶ！</button>
+          <button type="button" class="title-btn" id="titleBtn">タイトルに もどる。</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var total = 5; // questions in the current round (5 / 10 / 20)
+        // best ms per count. Light persistence trial: also kept in the
+        // browser's local storage so it can survive a reload where the
+        // storage is available; any storage error falls back silently
+        // to keeping it in memory while the page is open.
+        var BEST_KEY = "sakuranbo-tasizan-best-v1";
+        var bestTimes = { 5: null, 10: null, 20: null };
+        function loadBestTimes() {
+          try {
+            var raw = window.localStorage.getItem(BEST_KEY);
+            if (!raw) return;
+            var data = JSON.parse(raw);
+            [5, 10, 20].forEach(function (c) {
+              var v = data ? data[c] : null;
+              if (typeof v === "number" && isFinite(v) && v > 0) bestTimes[c] = v;
+            });
+          } catch (e) {
+            /* storage unavailable: in-memory only */
+          }
+        }
+        function saveBestTimes() {
+          try {
+            window.localStorage.setItem(BEST_KEY, JSON.stringify(bestTimes));
+          } catch (e) {
+            /* storage unavailable: in-memory only */
+          }
+        }
+        loadBestTimes();
+        var startTime = 0;
+        var finishTime = 0;
+        var CHERRY_SVG =
+          '<svg class="cherry" viewBox="0 0 48 48" aria-hidden="true">' +
+          '<path class="stem" d="M27 5 C25 13 20 18 14 24" fill="none" stroke-width="3" stroke-linecap="round"/>' +
+          '<path class="stem" d="M27 5 C29 13 32 18 35 25" fill="none" stroke-width="3" stroke-linecap="round"/>' +
+          '<path class="leaf" d="M27 5 C31 1 37 1 40 3 C37 7 31 8 27 5 Z" stroke-width="2" stroke-linejoin="round"/>' +
+          '<circle class="fruit" cx="13" cy="34" r="10"/>' +
+          '<circle class="fruit" cx="36" cy="36" r="9"/>' +
+          '<circle cx="9.5" cy="30" r="3" fill="#ffffff" opacity="0.45"/>' +
+          '<circle cx="32.5" cy="32.5" r="2.6" fill="#ffffff" opacity="0.45"/>' +
+          "</svg>";
+        var STAR_PATH =
+          "M24 4 L30 18 L45 19.5 L34 29 L37.5 44 L24 36.5 L10.5 44 L14 29 L3 19.5 L18 18 Z";
+
+        var el = {
+          topbar: document.getElementById("topbar"),
+          titleScreen: document.getElementById("titleScreen"),
+          titleCherries: document.getElementById("titleCherries"),
+          progressText: document.getElementById("progressText"),
+          progressCherries: document.getElementById("progressCherries"),
+          playScreen: document.getElementById("playScreen"),
+          resultScreen: document.getElementById("resultScreen"),
+          hint: document.getElementById("hint"),
+          stage: document.getElementById("stage"),
+          tenGroup: document.getElementById("tenGroup"),
+          tenLoop: document.getElementById("tenLoop"),
+          tenBadge: document.getElementById("tenBadge"),
+          equation: document.getElementById("equation"),
+          numA: document.getElementById("numA"),
+          numB: document.getElementById("numB"),
+          sakuraA: document.getElementById("sakuraA"),
+          sakuraB: document.getElementById("sakuraB"),
+          boxAL: document.getElementById("boxAL"),
+          boxAR: document.getElementById("boxAR"),
+          boxBL: document.getElementById("boxBL"),
+          boxBR: document.getElementById("boxBR"),
+          answerSlot: document.getElementById("answerSlot"),
+          blocksPanel: document.getElementById("blocksPanel"),
+          blocksCaption: document.getElementById("blocksCaption"),
+          blocksFlow: document.getElementById("blocksFlow"),
+          feedback: document.getElementById("feedback"),
+          pad: document.getElementById("pad"),
+          bigCherries: document.getElementById("bigCherries"),
+          resultTitle: document.getElementById("resultTitle"),
+          scoreLine: document.getElementById("scoreLine"),
+          resultMessage: document.getElementById("resultMessage"),
+          timeLine: document.getElementById("timeLine"),
+          bestNote: document.getElementById("bestNote"),
+          review: document.getElementById("review"),
+          againBtn: document.getElementById("againBtn"),
+          titleBtn: document.getElementById("titleBtn"),
+        };
+
+        // ----- sound (gentle WebAudio tones) -----
+        var audioCtx = null;
+        function beep(freq, start, dur, type) {
+          try {
+            if (!audioCtx) {
+              var AC = window.AudioContext || window.webkitAudioContext;
+              if (!AC) return;
+              audioCtx = new AC();
+            }
+            if (audioCtx.state === "suspended") audioCtx.resume();
+            var t = audioCtx.currentTime + start;
+            var osc = audioCtx.createOscillator();
+            var gain = audioCtx.createGain();
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + dur + 0.05);
+          } catch (e) {
+            /* sound is optional */
+          }
+        }
+        function sndPop() { beep(740, 0, 0.09, "triangle"); }
+        function sndGood() {
+          beep(523, 0, 0.12, "triangle");
+          beep(659, 0.07, 0.12, "triangle");
+          beep(784, 0.14, 0.2, "triangle");
+        }
+        function sndTry() { beep(220, 0, 0.14, "sine"); }
+        function sndTen() {
+          beep(784, 0, 0.12, "triangle");
+          beep(1047, 0.08, 0.22, "triangle");
+        }
+        function sndFanfare() {
+          var notes = [523, 659, 784, 1047, 784, 1047];
+          for (var i = 0; i < notes.length; i++) beep(notes[i], i * 0.09, 0.2, "triangle");
+        }
+
+        // ----- question generation: 1-digit + 1-digit, sum 11..18 -----
+        function makeQuestions(count) {
+          var pool = [];
+          for (var a = 2; a <= 9; a++) {
+            for (var b = 2; b <= 9; b++) {
+              if (a + b >= 11 && a + b <= 18) pool.push({ a: a, b: b });
+            }
+          }
+          // shuffle
+          for (var i = pool.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+          }
+          var picked = [];
+          var usedPairs = {};
+          var usedOrdered = {};
+          var usedSums = {};
+          function tryPick(q, uniquePair) {
+            var key = Math.min(q.a, q.b) + "-" + Math.max(q.a, q.b);
+            var okey = q.a + "-" + q.b;
+            if (uniquePair && usedPairs[key]) return;
+            if (usedOrdered[okey]) return;
+            usedPairs[key] = true;
+            usedOrdered[okey] = true;
+            usedSums[q.a + q.b] = true;
+            picked.push(q);
+          }
+          var k, q;
+          for (k = 0; k < pool.length && picked.length < count; k++) {
+            q = pool[k];
+            if (usedSums[q.a + q.b] && picked.length < 3) continue; // spread sums early
+            tryPick(q, true);
+          }
+          for (k = 0; k < pool.length && picked.length < count; k++) tryPick(pool[k], true);
+          for (k = 0; k < pool.length && picked.length < count; k++) tryPick(pool[k], false);
+          while (picked.length < count) {
+            picked.push(pool[Math.floor(Math.random() * pool.length)]);
+          }
+          return picked;
+        }
+
+        // ----- state -----
+        var questions = [];
+        var idx = 0;
+        var score = 0; // first-try correct count
+        var results = [];
+        var cur = null; // {a,b,sum,splits:{A:{partner,need,rest},B:{...}}}
+        var openSide = null; // null | "A" | "B" — which number is split open
+        var revealedL = false;
+        var revealedR = false;
+        var firstTry = true;
+        var locked = false;
+        var advanceTimer = null;
+        var grouped = false; // partner + the "make 10" number are looped as 10
+        var blocksFlown = false; // need cubes have landed in the partner's row
+        var blockJoining = false; // need cubes are flying to the ghost spots
+        var blockFlightTimer = null;
+        var dragState = null; // active drag of the need box
+        var suppressClick = false; // swallow the click that ends a drag
+
+        // per-side element lookup
+        function sideEls(side) {
+          return side === "A"
+            ? { num: el.numA, sakura: el.sakuraA, boxL: el.boxAL, boxR: el.boxAR }
+            : { num: el.numB, sakura: el.sakuraB, boxL: el.boxBL, boxR: el.boxBR };
+        }
+        function resetSide(side) {
+          var s = sideEls(side);
+          s.sakura.classList.remove("shown");
+          clearTenGroup();
+          [s.boxL, s.boxR].forEach(function (box) {
+            box.classList.remove("revealed", "need", "rest", "draggable", "dragging");
+            box.style.transform = "";
+            box.style.zIndex = "";
+            box.textContent = "";
+            box.disabled = false;
+          });
+          s.num.classList.add("tappable");
+          s.num.classList.remove("opened");
+          s.num.disabled = false;
+        }
+
+        function cherryRow(count, onCount, big) {
+          var html = "";
+          for (var i = 0; i < count; i++) html += CHERRY_SVG;
+          var wrap = document.createElement("div");
+          wrap.innerHTML = html;
+          var nodes = wrap.querySelectorAll(".cherry");
+          for (var n = 0; n < nodes.length; n++) {
+            if (n < onCount) nodes[n].classList.add("on");
+          }
+          return wrap.innerHTML;
+        }
+
+        function renderProgress(popLast) {
+          el.progressText.innerHTML =
+            "もんだい <b>" + (idx + 1) + "</b> / " + total;
+          el.progressCherries.innerHTML = cherryRow(total, results.length);
+          el.progressCherries.classList.toggle("many", total > 10);
+          if (popLast && results.length > 0) {
+            var last = el.progressCherries.querySelectorAll(".cherry")[results.length - 1];
+            if (last) last.classList.add("pop");
+          }
+        }
+
+        function setHint(html) { el.hint.innerHTML = html; }
+
+        // ----- counting blocks, mirroring the sakuranbo steps -----
+        var blockCubes = [];
+        function buildBlocks() {
+          if (!cur) return;
+          if (blockFlightTimer) { clearTimeout(blockFlightTimer); blockFlightTimer = null; }
+          blockJoining = false;
+          blocksFlown = false;
+          el.blocksPanel.classList.remove("is-joining");
+          el.blocksFlow.innerHTML = "";
+          blockCubes = [];
+          function makeRow() {
+            var r = document.createElement("div");
+            r.className = "blocks-row";
+            el.blocksFlow.appendChild(r);
+            return r;
+          }
+          function add(row, role) {
+            var c = document.createElement("div");
+            c.className = "block-cube is-" + role;
+            c.dataset.role = role;
+            row.appendChild(c);
+            blockCubes.push(c);
+          }
+          // the solid cubes are always built the same way, split or
+          // not: the front number's cubes on the top row and the
+          // back number's cubes on the bottom row, in the same
+          // order and the same places as the starting display, so
+          // tapping a number never moves a block. Opening a split
+          // only renames the roles of the split number's own cubes
+          // in place — in the same left-to-right order as its two
+          // boxes (front number: rest then need; back number: need
+          // then rest) — while the partner's cubes keep their row.
+          // The one thing that is added is a run of transparent
+          // ghost cubes to the right of the partner's (the number
+          // that was not tapped) cubes: exactly as many as the
+          // partner needs to reach 10
+          var rowA = makeRow();
+          var rowB = makeRow();
+          var i;
+          if (!openSide) {
+            for (i = 0; i < cur.a; i++) add(rowA, "ga");
+            for (i = 0; i < cur.b; i++) add(rowB, "gb");
+          } else if (openSide === "A") {
+            var splitA = cur.splits.A;
+            for (i = 0; i < cur.a; i++) add(rowA, i < splitA.rest ? "rest" : "need");
+            for (i = 0; i < cur.b; i++) add(rowB, "partner");
+            for (i = 0; i < splitA.need; i++) add(rowB, "ghost");
+          } else {
+            var splitB = cur.splits.B;
+            for (i = 0; i < cur.a; i++) add(rowA, "partner");
+            for (i = 0; i < splitB.need; i++) add(rowA, "ghost");
+            for (i = 0; i < cur.b; i++) add(rowB, i < splitB.need ? "need" : "rest");
+          }
+          renderBlocks();
+        }
+
+        function renderBlocks() {
+          if (!cur) return;
+          var joined = grouped && restRevealed();
+          el.blocksPanel.classList.toggle("is-split", !!openSide);
+          el.blocksPanel.classList.toggle("is-grouped", grouped);
+          el.blocksPanel.classList.toggle("is-joined", joined);
+          el.blocksPanel.classList.toggle("is-done", locked);
+          var hlNeed = needRevealed();
+          var hlRest = restRevealed();
+          blockCubes.forEach(function (cube) {
+            var role = cube.dataset.role;
+            if (role === "ghost") {
+              // the ghosts only fill the partner's gap to 10 while
+              // the split is open: once the need number has been
+              // dragged over and the 10 is made (or the question is
+              // answered), the real cubes have taken their place.
+              // While those cubes are still flying to the ghost
+              // spots, the ghosts stay visible as landing targets
+              cube.classList.toggle("ghost-gone", (grouped || locked) && !blockJoining);
+              cube.classList.toggle("ghost-target", blockJoining);
+              return;
+            }
+            // cubes inside a row always touch with no gap at all,
+            // including between the partner cubes and the need
+            // cubes: the two groups are told apart by the coloured
+            // outlines below and by the caption, never by a space
+            cube.classList.toggle("hl-ten",
+              !joined && ((role === "need" && hlNeed) || (role === "partner" && grouped)));
+            cube.classList.toggle("hl-ones",
+              !joined && role === "rest" && hlRest);
+            cube.classList.toggle("final", joined || locked);
+          });
+          if (locked) {
+            el.blocksCaption.innerHTML =
+              "こたえは <span class='hl'>" + cur.sum + "</span> こ！";
+          } else if (joined) {
+            var splitJ = cur.splits[openSide];
+            el.blocksCaption.innerHTML =
+              "<span class='hl'>10</span> と " +
+              "<span class='hl-b'>" + splitJ.rest + "</span> で ・・・？";
+          } else if (grouped) {
+            el.blocksCaption.innerHTML = "<span class='hl'>10</span> が できたよ。";
+          } else if (openSide) {
+            var splitS = cur.splits[openSide];
+            var splitVal = openSide === "A" ? cur.a : cur.b;
+            // the caption mirrors the two sakuranbo boxes: a box
+            // that has not been tapped yet stays a blank (⬜︎), and
+            // tapping a box turns its blank into that box's number,
+            // in the same need-then-rest order as the caption
+            var needPart = hlNeed
+              ? "<span class='hl'>" + splitS.need + "</span>"
+              : "⬜︎";
+            var restPart = hlRest
+              ? "<span class='hl-b'>" + splitS.rest + "</span>"
+              : "⬜︎";
+            el.blocksCaption.innerHTML =
+              splitVal + " を " + needPart + " と " + restPart + " に わけるよ。";
+          } else {
+            el.blocksCaption.textContent =
+              "ブロックは " + cur.a + " こ と " + cur.b + " こ。";
+          }
+        }
+
+        function loadQuestion() {
+          var q = questions[idx];
+          // either number can be split: the split gives the partner
+          // what it needs to make 10, plus the rest
+          var needForA = 10 - q.a; // splitting B: left box
+          var needForB = 10 - q.b; // splitting A: left box
+          cur = {
+            a: q.a,
+            b: q.b,
+            sum: q.a + q.b,
+            splits: {
+              A: { partner: q.b, need: needForB, rest: q.a - needForB },
+              B: { partner: q.a, need: needForA, rest: q.b - needForA },
+            },
+          };
+          openSide = null;
+          revealedL = false;
+          revealedR = false;
+          firstTry = true;
+          locked = false;
+
+          el.numA.textContent = q.a;
+          el.numB.textContent = q.b;
+          resetSide("A");
+          resetSide("B");
+          buildBlocks();
+
+          el.answerSlot.textContent = "？";
+          el.answerSlot.classList.remove("filled");
+          el.feedback.textContent = "";
+          el.feedback.className = "feedback";
+
+          var padBtns = el.pad.querySelectorAll("button");
+          padBtns.forEach(function (btn) {
+            btn.disabled = false;
+            btn.classList.remove("wrong", "correct");
+          });
+
+          renderProgress(false);
+          setHint("すきな かずを タッチして、さくらんぼに しよう！");
+        }
+
+        function openSakura(side) {
+          if (locked || openSide === side) return;
+          sndPop();
+          if (openSide) resetSide(openSide); // switch: close the other one
+          openSide = side;
+          revealedL = false;
+          revealedR = false;
+          var s = sideEls(side);
+          s.num.classList.remove("tappable");
+          s.num.classList.add("opened");
+          s.sakura.classList.add("shown");
+          buildBlocks();
+          setHint(partnerQuestionHint());
+        }
+
+        // right after a sakuranbo opens, ask how many more the
+        // partner (the number that was not tapped) needs to make
+        // 10, instead of naming the split: "8 は あと いくつで 10 かな？"
+        function partnerQuestionHint() {
+          if (!openSide) return "";
+          var split = cur.splits[openSide];
+          return (
+            "<span class='hl'>" + split.partner + "</span> は あと いくつで " +
+            "<span class='hl'>10</span> かな？"
+          );
+        }
+
+        // the number that makes 10 with the partner sits in the box
+        // next to that partner: the right box when splitting the front
+        // number (partner is on the right), the left box otherwise.
+        // that box is the "need" (red); the other one is the "rest" (blue)
+        function boxRole(numSide, boxSide) {
+          if (numSide === "A") return boxSide === "R" ? "need" : "rest";
+          return boxSide === "L" ? "need" : "rest";
+        }
+
+        // ----- drag the "make 10" number onto its partner -----
+        function needRevealed() {
+          if (!openSide) return false;
+          return openSide === "A" ? revealedR : revealedL;
+        }
+        function restRevealed() {
+          if (!openSide) return false;
+          return openSide === "A" ? revealedL : revealedR;
+        }
+        function needBoxEl() {
+          if (!openSide) return null;
+          var s = sideEls(openSide);
+          return boxRole(openSide, "L") === "need" ? s.boxL : s.boxR;
+        }
+        function partnerNumEl() {
+          if (!openSide) return null;
+          return openSide === "A" ? el.numB : el.numA;
+        }
+
+        function clearTenGroup() {
+          grouped = false;
+          el.tenGroup.hidden = true;
+          el.tenGroup.classList.remove("pop");
+          if (blockFlightTimer) { clearTimeout(blockFlightTimer); blockFlightTimer = null; }
+          if (blockJoining || blocksFlown) {
+            // the need cubes left their own row (or are leaving
+            // it): rebuild the fixed two rows so every solid cube
+            // is back in its starting place
+            blockJoining = false;
+            blocksFlown = false;
+            el.blocksPanel.classList.remove("is-joining");
+            if (cur) buildBlocks(); else renderBlocks();
+          } else {
+            renderBlocks();
+          }
+        }
+
+        // draw the slanted loop around the partner number and the need box,
+        // measured from their real on-screen positions, badge beside it
+        function positionTenGroup() {
+          var partner = partnerNumEl();
+          var box = needBoxEl();
+          if (!partner || !box) return;
+          var stageRect = el.stage.getBoundingClientRect();
+          var pr = partner.getBoundingClientRect();
+          var br = box.getBoundingClientRect();
+          var x1 = pr.left + pr.width / 2 - stageRect.left;
+          var y1 = pr.top + pr.height / 2 - stageRect.top;
+          var x2 = br.left + br.width / 2 - stageRect.left;
+          var y2 = br.top + br.height / 2 - stageRect.top;
+          var dx = x2 - x1;
+          var dy = y2 - y1;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          var angle = Math.atan2(dy, dx);
+          var mx = (x1 + x2) / 2;
+          var my = (y1 + y2) / 2;
+          var loopH = Math.max(pr.height * 0.84, br.height + 28);
+          var loopW = dist + Math.max(pr.width, br.width) * 0.8 + 38;
+          el.tenLoop.style.width = loopW + "px";
+          el.tenLoop.style.height = loopH + "px";
+          el.tenLoop.style.left = mx + "px";
+          el.tenLoop.style.top = my + "px";
+          el.tenLoop.style.transform =
+            "translate(-50%, -50%) rotate(" + (angle * 180) / Math.PI + "deg)";
+          // badge beside the loop. Splitting the back number keeps the
+          // chalk-style badge on the loop's left; splitting the front
+          // number puts it at the loop's bottom right (the side away
+          // from the split number, level with the lower half), as asked
+          var px = -Math.sin(angle);
+          var py = Math.cos(angle);
+          if (openSide === "A") {
+            if (px < 0) { px = -px; py = -py; } // flip to the right side
+            if (py < 0) py = -py; // and keep it on the bottom half
+          } else if (px > 0) {
+            px = -px; py = -py;
+          }
+          var off = loopH / 2 + 40;
+          var bx = mx + px * off;
+          var by = my + py * off;
+          bx = Math.max(46, Math.min(stageRect.width - 46, bx));
+          by = Math.max(34, Math.min(stageRect.height - 34, by));
+          el.tenBadge.style.left = bx + "px";
+          el.tenBadge.style.top = by + "px";
+        }
+
+        function showTenGroup() {
+          // Measure the flight first, while the ghost cubes are
+          // still on screen: each "need" cube from the split
+          // number's row flies onto one ghost cube to the right
+          // of the partner's cubes (8 + 3 split as 2 and 1: the
+          // two need cubes rise from the bottom row onto the two
+          // ghosts beside the 8, so 8 and 2 visibly join into 10)
+          var needCubes = [];
+          var ghostCubes = [];
+          blockCubes.forEach(function (cube) {
+            if (cube.dataset.role === "need") needCubes.push(cube);
+            if (cube.dataset.role === "ghost") ghostCubes.push(cube);
+          });
+          var flights = [];
+          if (needCubes.length > 0 && needCubes.length === ghostCubes.length) {
+            for (var fi = 0; fi < needCubes.length; fi++) {
+              var nr = needCubes[fi].getBoundingClientRect();
+              var gr = ghostCubes[fi].getBoundingClientRect();
+              if (nr.width && gr.width) {
+                flights.push({
+                  need: needCubes[fi],
+                  ghost: ghostCubes[fi],
+                  dx: gr.left - nr.left,
+                  dy: gr.top - nr.top,
+                });
+              }
+            }
+            if (flights.length !== needCubes.length) flights = [];
+          }
+          grouped = true;
+          blockJoining = flights.length > 0;
+          if (blockJoining) el.blocksPanel.classList.add("is-joining");
+          el.tenGroup.hidden = false;
+          renderBlocks();
+          positionTenGroup();
+          el.tenGroup.classList.remove("pop");
+          void el.tenGroup.offsetWidth; // restart the pop animation
+          el.tenGroup.classList.add("pop");
+          if (!blockJoining) return;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              flights.forEach(function (f, i) {
+                f.need.classList.add("is-flying");
+                f.need.style.transitionDelay = i * 70 + "ms";
+                f.need.style.transform =
+                  "translate(" + f.dx + "px, " + f.dy + "px)";
+              });
+            });
+          });
+          var reduced = window.matchMedia &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (blockFlightTimer) clearTimeout(blockFlightTimer);
+          blockFlightTimer = setTimeout(function () {
+            blockFlightTimer = null;
+            blockJoining = false;
+            el.blocksPanel.classList.remove("is-joining");
+            // Land for real: move the flown cubes into the
+            // partner's row, right where the ghosts were, and let
+            // the ghosts go — the row is now a solid 10 (partner
+            // cubes + need cubes touching with no gap), and the
+            // split number's row keeps only the rest cubes
+            var partnerRow = flights[0].ghost.parentNode;
+            var firstGhost = flights[0].ghost;
+            if (partnerRow) {
+              flights.forEach(function (f) {
+                f.need.classList.remove("is-flying");
+                f.need.style.transform = "";
+                f.need.style.transitionDelay = "";
+                f.need.dataset.flown = "1";
+                partnerRow.insertBefore(f.need, firstGhost);
+              });
+              blocksFlown = true;
+            }
+            renderBlocks();
+          }, reduced ? 90 : 740 + (flights.length - 1) * 70);
+        }
+
+        function onBoxPointerDown(numSide, boxSide, e) {
+          if (locked || grouped || openSide !== numSide) return;
+          if (boxRole(numSide, boxSide) !== "need") return;
+          var shown = boxSide === "L" ? revealedL : revealedR;
+          if (!shown) return;
+          var s = sideEls(numSide);
+          var box = boxSide === "L" ? s.boxL : s.boxR;
+          dragState = {
+            box: box,
+            sakura: s.sakura,
+            partner: partnerNumEl(),
+            startX: e.clientX,
+            startY: e.clientY,
+            moved: false,
+          };
+          try { box.setPointerCapture(e.pointerId); } catch (err) { /* optional */ }
+        }
+
+        function onBoxPointerMove(e) {
+          if (!dragState) return;
+          var dx = e.clientX - dragState.startX;
+          var dy = e.clientY - dragState.startY;
+          if (!dragState.moved && Math.sqrt(dx * dx + dy * dy) < 12) return;
+          if (!dragState.moved) {
+            dragState.moved = true;
+            dragState.box.classList.add("dragging");
+            el.blocksPanel.classList.add("is-dragging");
+            dragState.box.style.transition = "none";
+            dragState.box.style.zIndex = "20";
+            dragState.sakura.style.zIndex = "8";
+            if (dragState.partner) dragState.partner.classList.add("drop-hint");
+          }
+          dragState.box.style.transform =
+            "translate(" + dx + "px, " + dy + "px) scale(1.14)";
+        }
+
+        function onBoxPointerUp(e) {
+          if (!dragState) return;
+          var st = dragState;
+          dragState = null;
+          el.blocksPanel.classList.remove("is-dragging");
+          if (st.partner) st.partner.classList.remove("drop-hint");
+          st.sakura.style.zIndex = "";
+          if (!st.moved) return;
+          suppressClick = true;
+          setTimeout(function () { suppressClick = false; }, 400);
+          var dropped = false;
+          if (st.partner) {
+            var r = st.partner.getBoundingClientRect();
+            dropped =
+              e.clientX >= r.left - 30 && e.clientX <= r.right + 30 &&
+              e.clientY >= r.top - 30 && e.clientY <= r.bottom + 30;
+          }
+          st.box.classList.remove("dragging");
+          st.box.style.zIndex = "";
+          if (dropped) {
+            // Snap the box straight back into its slot with no return
+            // animation, and force a reflow, BEFORE the loop is measured.
+            // Measuring while the box was still animating back from the
+            // drop point made the loop hug the partner number alone —
+            // it only looked right after a resize re-measured it.
+            st.box.style.transition = "none";
+            st.box.style.transform = "";
+            void st.box.offsetWidth;
+            setTimeout(function () { st.box.style.transition = ""; }, 60);
+            sndTen();
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                showTenGroup();
+                updateSplitHint();
+                // re-measure once any late layout shift has settled,
+                // so the two numbers stay enclosed no matter what
+                setTimeout(function () {
+                  if (grouped) positionTenGroup();
+                }, 180);
+              });
+            });
+          } else {
+            st.box.style.transition = "transform 0.16s ease";
+            st.box.style.transform = "";
+            setTimeout(function () { st.box.style.transition = ""; }, 200);
+          }
+        }
+
+        function updateSplitHint() {
+          if (!openSide) return;
+          var split = cur.splits[openSide];
+          if (grouped) {
+            if (restRevealed()) {
+              // once the 10 is made and both numbers are shown,
+              // the line above the equation says only how the 10
+              // was made: "3 と 7 で 10。"
+              setHint(
+                split.partner + " と " + split.need +
+                " で <span class='hl'>10</span>。"
+              );
+            } else {
+              setHint("<span class='hl'>10</span>が できた！<br>もう ひとつの しかくも タッチしてね！");
+            }
+          } else if (revealedL && revealedR) {
+            setHint(
+              split.partner + " と " + split.need + " で <span class='hl'>10</span>。<br>" +
+              "「" + split.need + "」を " + split.partner + " に くっつけて みよう！"
+            );
+          } else if (needRevealed()) {
+            setHint(
+              split.partner + " と " + split.need + " で <span class='hl'>10</span>。<br>" +
+              "「" + split.need + "」を " + split.partner + " に くっつけて みよう！"
+            );
+          } else if (revealedL || revealedR) {
+            setHint("もう ひとつの しかくも タッチしてね！");
+          } else {
+            setHint(partnerQuestionHint());
+          }
+        }
+
+        // tapping a box shows its number; tapping it again hides it.
+        // the "make 10" number, once shown, can also be dragged onto
+        // its partner (see onBoxPointerDown and friends)
+        function toggleBox(numSide, boxSide) {
+          if (suppressClick) { suppressClick = false; return; }
+          if (openSide !== numSide || locked) return;
+          var s = sideEls(numSide);
+          var split = cur.splits[numSide];
+          var leftValue = numSide === "A" ? split.rest : split.need;
+          var rightValue = numSide === "A" ? split.need : split.rest;
+          var isL = boxSide === "L";
+          var box = isL ? s.boxL : s.boxR;
+          var shown = isL ? revealedL : revealedR;
+          var role = boxRole(numSide, boxSide);
+          sndPop();
+          if (shown) {
+            if (isL) revealedL = false; else revealedR = false;
+            box.textContent = "";
+            box.classList.remove("revealed", "need", "rest", "draggable");
+            if (role === "need") clearTenGroup(); // the 10 falls apart with it
+          } else {
+            if (isL) revealedL = true; else revealedR = true;
+            box.textContent = isL ? leftValue : rightValue;
+            box.classList.add("revealed", role);
+            if (role === "need") box.classList.add("draggable");
+          }
+          renderBlocks();
+          updateSplitHint();
+        }
+
+        function starBurst() {
+          var burst = document.createElement("span");
+          burst.className = "star-burst";
+          var dirs = [
+            [-70, -46], [-26, -70], [26, -70], [70, -46], [0, -84], [-52, 6], [52, 6],
+          ];
+          dirs.forEach(function (d) {
+            var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            s.setAttribute("viewBox", "0 0 48 48");
+            s.style.setProperty("--dx", d[0] + "px");
+            s.style.setProperty("--dy", d[1] + "px");
+            var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("d", STAR_PATH);
+            s.appendChild(p);
+            burst.appendChild(s);
+          });
+          el.feedback.appendChild(burst);
+          setTimeout(function () { burst.remove(); }, 650);
+        }
+
+        function answer(value, btn) {
+          if (locked) return;
+          if (value === cur.sum) {
+            locked = true;
+            sndGood();
+            btn.classList.add("correct");
+            el.pad.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+            el.answerSlot.textContent = cur.sum;
+            el.answerSlot.classList.add("filled");
+            el.feedback.className = "feedback good";
+            el.feedback.textContent = firstTry ? "せいかい！ すごい！" : "せいかい！ よく がんばったね！";
+            starBurst();
+            if (firstTry) score++;
+            results.push({ a: cur.a, b: cur.b, sum: cur.sum, firstTry: firstTry });
+            if (results.length >= total) finishTime = Date.now();
+            renderBlocks();
+            renderProgress(true);
+            advanceTimer = setTimeout(next, 1050);
+          } else {
+            firstTry = false;
+            sndTry();
+            btn.classList.add("wrong");
+            btn.disabled = true;
+            el.feedback.className = "feedback try";
+            el.feedback.textContent = "おしい！ もういちど かんがえて みよう！";
+            if (!openSide) {
+              setHint("すきな かずを タッチすると、さくらんぼが でるよ。");
+            }
+          }
+        }
+
+        function next() {
+          idx++;
+          if (idx < total) {
+            loadQuestion();
+          } else {
+            showResult();
+          }
+        }
+
+        // encouragement by first-try ratio, so it works for 5, 10 and 20
+        function resultText(score, count) {
+          if (score === count) {
+            return { title: "パーフェクト！！", msg: "ぜんぶ ひとりで せいかい！ きみは たしざん めいじんだね！ また あそんで、もっと はやく できるように なろう！" };
+          }
+          var r = count ? score / count : 0;
+          if (r >= 0.8) return { title: "よく できました！", msg: "あと ちょっとで パーフェクト！ すごい ちょうしだね。もういちど やれば、ぜんぶ せいかい できるかも！" };
+          if (r >= 0.6) return { title: "すごい！ がんばったね！", msg: "さくらんぼの つかいかたが バッチリ わかっているね。もういちど やって、パーフェクトを めざそう！" };
+          if (r >= 0.4) return { title: "がんばったね！", msg: "さくらんぼで かんがえるのが じょうずに なってきたね。もういちど やると、もっと できるように なるよ！" };
+          if (r >= 0.2) return { title: "よく がんばったね！", msg: "さくらんぼの やりかたは わかったかな？ ゆっくり かんがえれば だいじょうぶ。もういちど やってみよう！" };
+          return { title: "よく がんばったね！", msg: "さいしょは むずかしいけど、さくらんぼを つかうと わかりやすくなるよ。もういちど チャレンジして、さくらんぼ めいじんを めざそう！" };
+        }
+
+        function showResult() {
+          el.playScreen.hidden = true;
+          el.resultScreen.hidden = false;
+          el.progressText.innerHTML = "おつかれさま！";
+          el.progressCherries.innerHTML = cherryRow(total, score);
+          el.progressCherries.classList.toggle("many", total > 10);
+
+          var t = resultText(score, total);
+          el.resultTitle.textContent = t.title;
+          el.resultMessage.textContent = t.msg;
+          el.scoreLine.innerHTML = "<b>" + total + "</b> もん中 <b>" + score + "</b> もん、ひとりで せいかい！";
+          el.bigCherries.innerHTML = cherryRow(total, score, true);
+          el.bigCherries.classList.toggle("many", total > 10);
+
+          var elapsed = finishTime && startTime ? finishTime - startTime : 0;
+          el.timeLine.innerHTML = "かかった じかん <b>" + fmtTime(elapsed) + "</b>。";
+          var prevBest = bestTimes[total];
+          if (prevBest === null || elapsed < prevBest) {
+            bestTimes[total] = elapsed;
+            saveBestTimes();
+            el.bestNote.textContent = prevBest === null
+              ? "ベストタイム とうろく！ つぎは もっと はやく できるかな？"
+              : "ベストタイム こうしん！ すごい！";
+          } else {
+            el.bestNote.textContent = "ベストタイムは " + fmtTime(prevBest) + "。つぎは こえられるかな？";
+          }
+
+          el.review.innerHTML = "";
+          results.forEach(function (r) {
+            var li = document.createElement("li");
+            var expr = document.createElement("span");
+            expr.textContent = r.a + " + " + r.b + " = " + r.sum;
+            var mark = document.createElement("span");
+            mark.className = "mark " + (r.firstTry ? "first" : "retry");
+            mark.textContent = r.firstTry ? "◎" : "○";
+            li.appendChild(expr);
+            li.appendChild(mark);
+            el.review.appendChild(li);
+          });
+
+          if (score / total >= 0.8) {
+            sndFanfare();
+            rainStars();
+          } else if (score >= 1) {
+            sndGood();
+          }
+        }
+
+        function rainStars() {
+          var colors = ["#f7b731", "#e0342b", "#2f9e4f", "#ff8a5c"];
+          for (var i = 0; i < 16; i++) {
+            (function (i) {
+              var wrap = document.createElement("span");
+              wrap.className = "fall-star";
+              wrap.style.left = Math.random() * 96 + "%";
+              wrap.style.animationDuration = 1.1 + Math.random() * 1.0 + "s";
+              wrap.style.animationDelay = Math.random() * 0.5 + "s";
+              var size = 18 + Math.random() * 20;
+              var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+              s.setAttribute("viewBox", "0 0 48 48");
+              s.setAttribute("width", size);
+              s.setAttribute("height", size);
+              var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+              p.setAttribute("d", STAR_PATH);
+              p.setAttribute("fill", colors[i % colors.length]);
+              s.appendChild(p);
+              wrap.appendChild(s);
+              el.resultScreen.appendChild(wrap);
+              setTimeout(function () { wrap.remove(); }, 3000);
+            })(i);
+          }
+        }
+
+        function fmtTime(ms) {
+          var sec = Math.max(0, Math.round(ms / 1000));
+          var m = Math.floor(sec / 60);
+          var s = sec % 60;
+          return m > 0 ? m + "ふん " + s + "びょう" : s + "びょう";
+        }
+
+        function updateBestLabels() {
+          [5, 10, 20].forEach(function (c) {
+            var span = document.getElementById("best" + c);
+            if (!span) return;
+            if (bestTimes[c] === null) {
+              span.textContent = "まだ ない。";
+              span.classList.add("none");
+            } else {
+              span.textContent = fmtTime(bestTimes[c]) + "。";
+              span.classList.remove("none");
+            }
+          });
+        }
+
+        function showTitle() {
+          if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+          el.playScreen.hidden = true;
+          el.resultScreen.hidden = true;
+          el.titleScreen.hidden = false;
+          el.topbar.hidden = true;
+          updateBestLabels();
+        }
+
+        function startRound(count) {
+          if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+          total = count || total;
+          questions = makeQuestions(total);
+          idx = 0;
+          score = 0;
+          results = [];
+          startTime = Date.now();
+          finishTime = 0;
+          el.titleScreen.hidden = true;
+          el.resultScreen.hidden = true;
+          el.playScreen.hidden = false;
+          el.topbar.hidden = false;
+          loadQuestion();
+        }
+
+        // ----- build answer pad 11..18 -----
+        for (var v = 11; v <= 18; v++) {
+          (function (value) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = value;
+            btn.setAttribute("aria-label", "こたえ " + value);
+            btn.addEventListener("click", function () { answer(value, btn); });
+            el.pad.appendChild(btn);
+          })(v);
+        }
+
+        el.numA.addEventListener("click", function () { openSakura("A"); });
+        el.numB.addEventListener("click", function () { openSakura("B"); });
+        el.boxAL.addEventListener("click", function () { toggleBox("A", "L"); });
+        el.boxAR.addEventListener("click", function () { toggleBox("A", "R"); });
+        el.boxBL.addEventListener("click", function () { toggleBox("B", "L"); });
+        el.boxBR.addEventListener("click", function () { toggleBox("B", "R"); });
+        [["A", "L", el.boxAL], ["A", "R", el.boxAR], ["B", "L", el.boxBL], ["B", "R", el.boxBR]]
+          .forEach(function (cfg) {
+            cfg[2].addEventListener("pointerdown", function (e) {
+              onBoxPointerDown(cfg[0], cfg[1], e);
+            });
+            cfg[2].addEventListener("pointermove", onBoxPointerMove);
+            cfg[2].addEventListener("pointerup", onBoxPointerUp);
+            cfg[2].addEventListener("pointercancel", onBoxPointerUp);
+          });
+        window.addEventListener("resize", function () {
+          if (grouped) positionTenGroup();
+        });
+        window.addEventListener("orientationchange", function () {
+          if (grouped) {
+            setTimeout(function () { if (grouped) positionTenGroup(); }, 120);
+          }
+        });
+        // layout can also shift without a window resize (side panel
+        // opening, web font arriving, hint wrapping): re-measure then too
+        if ("ResizeObserver" in window) {
+          var tenRO = new ResizeObserver(function () {
+            if (grouped) positionTenGroup();
+          });
+          tenRO.observe(el.stage);
+          tenRO.observe(el.equation);
+        }
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () {
+            if (grouped) positionTenGroup();
+          });
+        }
+        el.againBtn.addEventListener("click", function () { sndPop(); startRound(total); });
+        el.titleBtn.addEventListener("click", function () { sndPop(); showTitle(); });
+        document.querySelectorAll(".count-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            startRound(parseInt(btn.getAttribute("data-count"), 10));
+          });
+        });
+
+        el.titleCherries.innerHTML = cherryRow(2, 2, true);
+        showTitle();
+      })();
+    </script>
+  </body>
+</html>
