@@ -35,6 +35,9 @@
         --rest-soft: #dfeefc;
         --blocks-bg: #dff1fa;
         --block-edge: #dd9d00;
+        --gold: #f2b705;
+        --gold-dark: #b97e00;
+        --gold-soft: #fdf0c2;
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -59,6 +62,9 @@
           --rest-soft: #22384f;
           --blocks-bg: #26333d;
           --block-edge: #c78f00;
+          --gold: #f5c542;
+          --gold-dark: #f5c542;
+          --gold-soft: #4a3d16;
         }
       }
 
@@ -617,14 +623,13 @@
         margin: 0 0 clamp(12px, 2.5vh, 24px);
       }
       .count-list {
-        display: flex;
-        flex-direction: column;
-        gap: clamp(10px, 2vh, 18px);
-        width: min(440px, 92vw);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(12px, 2.2vh, 20px) clamp(12px, 2.5vw, 20px);
+        width: min(600px, 94vw);
       }
-      .count-row { display: flex; align-items: center; gap: 16px; }
+      .count-row { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
       .count-btn {
-        flex: 0 0 auto;
         background: var(--accent);
         color: #fff;
         border: none;
@@ -632,12 +637,20 @@
         border-radius: 999px;
         font-size: clamp(23px, min(6vw, 4.6vh), 34px);
         font-weight: 800;
-        padding: clamp(9px, 1.8vh, 14px) 38px;
-        min-width: 3.9em;
+        padding: clamp(9px, 1.8vh, 14px) 12px;
+        width: 100%;
         transition: transform 0.08s ease;
       }
+      .count-btn-all { font-size: clamp(19px, min(5vw, 3.9vh), 28px); line-height: 1.25; }
+      .count-btn-all .cb-sub {
+        display: block;
+        font-size: 0.66em;
+        font-weight: 800;
+        opacity: 0.92;
+        margin-top: 1px;
+      }
       .count-btn:active { transform: translateY(4px); border-bottom-width: 3px; }
-      .best-box { text-align: left; }
+      .best-box { text-align: center; }
       .best-label {
         display: block;
         font-size: clamp(13px, 3.4vw, 16px);
@@ -770,6 +783,359 @@
         to { transform: translateY(105dvh) rotate(320deg); }
       }
 
+      /* ---------- guess overlay (よそう) ---------- */
+      .guess-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(30, 18, 14, 0.42);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 60;
+      }
+      .guess-panel {
+        background: var(--card);
+        border: 4px solid var(--pad-border);
+        border-radius: 24px;
+        padding: 18px 18px 20px;
+        width: min(360px, 92vw);
+        text-align: center;
+        box-shadow: 0 16px 36px rgba(30, 18, 14, 0.28);
+        animation: num-pop 0.22s ease;
+      }
+      .guess-q {
+        font-size: clamp(20px, 5.4vw, 27px);
+        font-weight: 800;
+        margin: 0 0 14px;
+        line-height: 1.35;
+      }
+      .guess-choices { display: flex; gap: 12px; justify-content: center; }
+      .guess-choices button {
+        flex: 1 1 0;
+        min-height: clamp(60px, 10vh, 76px);
+        font-size: clamp(28px, 7vw, 38px);
+        font-weight: 800;
+        color: var(--ink);
+        background: var(--pad-bg);
+        border: 4px solid var(--pad-border);
+        border-bottom-width: 7px;
+        border-radius: 18px;
+        transition: transform 0.05s ease;
+      }
+      .guess-choices button:active { transform: translateY(3px) scale(0.97); }
+
+      /* ---------- result: grade cherries & compact lines ---------- */
+      .cherry.gold .fruit { fill: var(--gold); }
+      .cherry.gold .stem { stroke: var(--leaf); }
+      .cherry.gold .leaf { stroke: var(--leaf); fill: var(--leaf); }
+      .cherry.red .fruit { fill: var(--accent); }
+      .cherry.red .stem { stroke: var(--leaf); }
+      .cherry.red .leaf { stroke: var(--leaf); fill: var(--leaf); }
+      .cherry.outline .fruit {
+        fill: none;
+        stroke: var(--ink-soft);
+        stroke-width: 2.5;
+      }
+      .cherry.outline .stem { stroke: var(--ink-soft); }
+      .cherry.outline .leaf { stroke: var(--ink-soft); fill: none; }
+      .cherries.all { gap: 2px; }
+      .cherries.all svg { width: 14px; }
+      .result .big-cherries.all { gap: 4px; }
+      .result .big-cherries.all svg { width: clamp(19px, 4.4vw, 28px); }
+      .result .counts-line {
+        font-size: clamp(15px, 4vw, 20px);
+        font-weight: 800;
+        color: var(--ink-soft);
+        margin: 2px 0 6px;
+      }
+      .result .counts-line .c-gold { color: var(--gold-dark); }
+      .result .counts-line .c-red { color: var(--accent); }
+      .result .time-small {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: clamp(14px, 3.8vw, 18px);
+        font-weight: 800;
+        color: var(--ink-soft);
+        margin: 0 0 4px;
+      }
+      .result .time-small svg { width: 1.15em; height: 1.15em; display: block; }
+      .result .best-note:empty { display: none; }
+      .result .best-note {
+        font-size: clamp(16px, 4.2vw, 21px);
+        color: var(--gold-dark);
+        margin: 0 0 8px;
+        min-height: 0;
+      }
+      .result .goal-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: clamp(17px, 4.6vw, 24px);
+        font-weight: 800;
+        margin: 4px 0 14px;
+      }
+      .result .goal-line svg { width: 1.3em; height: 1.3em; display: block; flex: 0 0 auto; }
+      .detail-btn {
+        background: var(--card);
+        color: var(--ink);
+        border: 3px solid var(--pad-border);
+        border-bottom-width: 6px;
+        border-radius: 999px;
+        font-size: clamp(16px, 4.2vw, 21px);
+        font-weight: 800;
+        padding: 8px 30px;
+        margin: 0 0 14px;
+        transition: transform 0.08s ease;
+      }
+      .detail-btn:active { transform: translateY(3px); border-bottom-width: 3px; }
+      .review-wrap { display: flex; flex-direction: column; align-items: center; }
+      .review .mark.gold { color: var(--gold-dark); }
+      .review .mark.red { color: var(--accent); }
+      .review .mark.outline { color: var(--ink-soft); }
+      .legend .lg-gold { color: var(--gold-dark); }
+      .legend .lg-red { color: var(--accent); }
+
+      /* ---------- result: weak-problem box (initial view, small) ---------- */
+      .weak-box {
+        background: var(--accent-soft);
+        border-radius: 18px;
+        padding: 10px 16px 12px;
+        margin: 0 0 14px;
+        width: min(480px, 92vw);
+      }
+      .weak-title {
+        font-size: clamp(16px, 4.4vw, 21px);
+        font-weight: 800;
+        margin: 0 0 8px;
+      }
+      .weak-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+        margin: 0 0 8px;
+      }
+      .weak-chip {
+        background: var(--card);
+        border: 3px solid var(--pad-border);
+        border-radius: 999px;
+        padding: 3px 14px;
+        font-size: clamp(16px, 4.4vw, 21px);
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      .weak-more {
+        font-size: clamp(14px, 3.8vw, 18px);
+        font-weight: 800;
+        color: var(--ink-soft);
+      }
+      .weak-note {
+        font-size: clamp(14px, 3.8vw, 18px);
+        font-weight: 800;
+        color: var(--accent-dark);
+        margin: 0;
+      }
+
+      /* ---------- result detail: colour legend ---------- */
+      .color-legend {
+        margin: 4px 0 14px;
+        text-align: left;
+        max-width: min(480px, 88vw);
+      }
+      .color-legend-title {
+        font-size: clamp(16px, 4.4vw, 21px);
+        font-weight: 800;
+        margin: 0 0 8px;
+        text-align: center;
+      }
+      .color-legend-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: clamp(14px, 3.9vw, 19px);
+        font-weight: 800;
+        line-height: 1.4;
+        margin: 0 0 6px;
+      }
+      .color-legend-row:last-child { margin-bottom: 0; }
+      .mini-cherry { flex: 0 0 auto; display: inline-flex; }
+      .mini-cherry svg { width: clamp(22px, 5.5vw, 28px); height: auto; display: block; }
+
+      /* ---------- guide (あそびかた) & in-play help ---------- */
+      .tb-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+      .help-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--card);
+        border: 3px solid var(--pad-border);
+        border-bottom-width: 5px;
+        color: var(--accent-dark);
+        font-size: 21px;
+        font-weight: 800;
+        line-height: 1;
+        padding: 0;
+      }
+      .help-btn:active { transform: translateY(2px); border-bottom-width: 3px; }
+      .quit-btn {
+        background: var(--card);
+        border: 3px solid var(--pad-border);
+        border-bottom-width: 5px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: clamp(14px, 3.6vw, 18px);
+        padding: 5px 18px;
+        color: var(--ink);
+      }
+      .quit-btn:active { transform: translateY(2px); border-bottom-width: 3px; }
+      .guide-btn {
+        margin-top: clamp(12px, 2.2vh, 20px);
+        width: min(600px, 94vw);
+        background: var(--green);
+        color: #fff;
+        border: none;
+        border-bottom: 7px solid #257a3c;
+        border-radius: 999px;
+        font-size: clamp(21px, min(5.6vw, 4.4vh), 32px);
+        font-weight: 800;
+        padding: clamp(9px, 1.8vh, 14px) 12px;
+        transition: transform 0.08s ease;
+      }
+      .guide-btn:active { transform: translateY(4px); border-bottom-width: 3px; }
+
+      /* one-sentence speech bubble (guide steps & the ？ button) */
+      .guide-bubble {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        top: calc(max(10px, env(safe-area-inset-top)) + 52px);
+        z-index: 75;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--card);
+        border: 4px solid var(--accent);
+        border-radius: 22px;
+        padding: 10px 12px 10px 18px;
+        max-width: min(620px, 94vw);
+        box-shadow: 0 10px 24px rgba(30, 18, 14, 0.25);
+      }
+      .guide-bubble::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -13px;
+        transform: translateX(-50%);
+        border: 7px solid transparent;
+        border-top: 9px solid var(--accent);
+        border-bottom: 0;
+      }
+      .guide-bubble-text {
+        font-size: clamp(19px, min(5vw, 3.6vh), 29px);
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.35;
+      }
+      .speak-btn {
+        flex: 0 0 auto;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 3px solid var(--pad-border);
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .speak-btn svg { width: 27px; height: 27px; display: block; }
+      .speak-btn:active { transform: scale(0.93); }
+      /* autoplay was blocked: make the speaker button stand out */
+      .speak-btn.attn {
+        background: var(--gold-soft);
+        border-color: var(--gold);
+        animation: ring-pulse 0.85s ease-in-out infinite;
+      }
+
+      /* bouncing finger mark that points at the next thing to touch */
+      .finger {
+        position: fixed;
+        z-index: 85;
+        pointer-events: none;
+        transform: translate(-50%, -18%);
+        filter: drop-shadow(0 3px 3px rgba(30, 18, 14, 0.35));
+      }
+      .finger-in {
+        display: block;
+        font-size: 42px;
+        line-height: 1;
+        animation: finger-bounce 0.55s ease-in-out infinite alternate;
+      }
+      .finger.soft .finger-in { animation-duration: 0.95s; opacity: 0.88; font-size: 36px; }
+      @keyframes finger-bounce {
+        from { translate: 0 0; }
+        to { translate: 0 -12px; }
+      }
+
+      /* the element the guide wants touched next glows */
+      .guide-glow { animation: glow-pulse 0.9s ease-in-out infinite; }
+      @keyframes glow-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(224, 52, 43, 0.45); }
+        50% { box-shadow: 0 0 0 13px rgba(224, 52, 43, 0); }
+      }
+      .pad.guide-glow { border-radius: 18px; }
+
+      /* dotted path the demo finger traces during the drag step */
+      .drag-path {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 4;
+      }
+      .drag-path line {
+        stroke: var(--accent);
+        stroke-width: 5;
+        stroke-dasharray: 10 9;
+        stroke-linecap: round;
+        opacity: 0.75;
+      }
+
+      /* tap-rescue: the 10 is selected, waiting for the partner tap */
+      .sakura.shown .box.revealed.need.tap-selected {
+        box-shadow: 0 0 0 5px var(--green);
+        scale: 1.1;
+      }
+
+      .guess-panel.shake { animation: shake 0.28s ease; }
+
+      /* guide finished panel */
+      .guide-done-panel { width: min(380px, 92vw); }
+      .guide-done-cherries { display: flex; gap: 8px; justify-content: center; margin-bottom: 2px; }
+      .guide-done-cherries svg { width: 54px; height: auto; display: block; }
+      .guide-done-title {
+        font-size: clamp(30px, 7.4vw, 44px);
+        font-weight: 800;
+        color: var(--accent-dark);
+        margin: 0 0 14px;
+      }
+      .guide-done-btns { display: flex; flex-direction: column; gap: 12px; }
+      .guide-done-btns .again-btn, .guide-done-btns .title-btn { width: 100%; }
+
+      @media (max-height: 700px) {
+        .guide-btn { padding: 8px 12px; }
+        .guide-bubble { top: calc(max(8px, env(safe-area-inset-top)) + 44px); padding: 8px 10px 8px 14px; }
+        .guide-bubble-text { font-size: clamp(17px, 4.6vw, 24px); }
+        .speak-btn { width: 46px; height: 46px; }
+      }
+
       [hidden] { display: none !important; }
 
       /* ---------- fit-to-screen: shrink with viewport height ----------
@@ -799,7 +1165,7 @@
         .title-name { font-size: clamp(34px, 8.5vw, 58px); }
         .title-lead { margin-bottom: 18px; }
         .count-list { gap: 12px; }
-        .count-btn { padding: 10px 32px; }
+        .count-btn { padding: 10px 14px; }
       }
       @media (max-height: 700px) {
         .hint { font-size: clamp(15px, 3.6vw, 21px); min-height: 2.9em; margin-top: 4px; }
@@ -818,7 +1184,8 @@
         .title-screen .title-cherries svg { width: clamp(42px, 10vw, 60px); }
         .title-name { font-size: clamp(30px, 8vw, 48px); margin: 2px 0 2px; }
         .title-lead { font-size: clamp(16px, 4.2vw, 22px); margin-bottom: 12px; }
-        .count-btn { font-size: clamp(22px, 5.6vw, 30px); padding: 8px 28px; }
+        .count-btn { font-size: clamp(22px, 5.6vw, 30px); padding: 8px 12px; }
+        .count-btn-all { font-size: clamp(18px, 4.8vw, 25px); }
         .result h1 { font-size: clamp(28px, 7.4vw, 46px); }
         .result .big-cherries svg { width: clamp(36px, 9vw, 52px); }
         .result .message { margin-bottom: 12px; }
@@ -868,6 +1235,10 @@
     <main class="app">
       <header class="topbar" id="topbar" hidden>
         <div class="progress-text" id="progressText"></div>
+        <div class="tb-actions">
+          <button type="button" class="help-btn" id="helpBtn" hidden aria-label="ひんとを みる">？</button>
+          <button type="button" class="quit-btn" id="quitBtn" hidden>やめる</button>
+        </div>
         <div class="cherries" id="progressCherries" aria-hidden="true"></div>
       </header>
 
@@ -898,7 +1269,15 @@
               <span class="best-time none" id="best20">まだ ない。</span>
             </div>
           </div>
+          <div class="count-row">
+            <button type="button" class="count-btn count-btn-all" data-count="all">ぜんぶの もんだい<span class="cb-sub" id="allCountSub"></span></button>
+            <div class="best-box">
+              <span class="best-label">ベストタイム</span>
+              <span class="best-time none" id="bestAll">まだ ない。</span>
+            </div>
+          </div>
         </div>
+        <button type="button" class="guide-btn" id="guideBtn">あそびかた</button>
       </section>
 
       <!-- ======== play screen ======== -->
@@ -929,6 +1308,7 @@
             <div class="ten-loop" id="tenLoop"></div>
             <button type="button" class="ten-badge empty" id="tenBadge" aria-label="まるを タッチして こたえを みる"></button>
           </div>
+          <svg class="drag-path" id="dragPath" hidden aria-hidden="true"><line id="dragLine" x1="0" y1="0" x2="0" y2="0" /></svg>
         </div>
 
         <div class="blocks-panel" id="blocksPanel" aria-hidden="true">
@@ -941,16 +1321,62 @@
         <div class="pad" id="pad" role="group" aria-label="こたえの かず"></div>
       </section>
 
+      <!-- ======== guess overlay ======== -->
+      <div class="guess-overlay" id="guessOverlay" hidden>
+        <div class="guess-panel" id="guessPanel" role="dialog" aria-label="よそう">
+          <p class="guess-q">なんの かずだと おもう？</p>
+          <div class="guess-choices" id="guessChoices"></div>
+        </div>
+      </div>
+
+      <!-- ======== guide: speech bubble & finger mark ======== -->
+      <div class="guide-bubble" id="guideBubble" hidden>
+        <p class="guide-bubble-text" id="guideBubbleText"></p>
+        <button type="button" class="speak-btn" id="speakBtn" aria-label="こえで きく">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.8a4.4 4.4 0 0 1 0 6.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M18.4 6a8 8 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="finger" id="fingerMark" hidden aria-hidden="true"><span class="finger-in" id="fingerIn">👆</span></div>
+
+      <!-- ======== guide finished panel ======== -->
+      <div class="guess-overlay guide-done-overlay" id="guideDone" hidden>
+        <div class="guess-panel guide-done-panel">
+          <div class="guide-done-cherries" id="guideDoneCherries" aria-hidden="true"></div>
+          <p class="guide-done-title">できたね！</p>
+          <div class="guide-done-btns">
+            <button type="button" class="again-btn" id="donePlayBtn">あそぶ！</button>
+            <button type="button" class="title-btn" id="doneAgainBtn">もういちど ガイド。</button>
+            <button type="button" class="title-btn" id="doneTitleBtn">タイトルに もどる。</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ======== result screen ======== -->
       <section id="resultScreen" class="result" hidden>
         <div class="big-cherries" id="bigCherries" aria-hidden="true"></div>
         <h1 id="resultTitle"></h1>
-        <p class="score-line" id="scoreLine"></p>
-        <p class="time-line" id="timeLine"></p>
+        <p class="counts-line" id="countsLine"></p>
+        <p class="time-small" id="timeLine"></p>
         <p class="best-note" id="bestNote"></p>
-        <p class="message" id="resultMessage"></p>
-        <ul class="review" id="review"></ul>
-        <p class="legend">◎ ひとりで できた。　　○ がんばって できた。</p>
+        <p class="goal-line">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 42 C10 34 6 20 8 6 C22 8 34 16 38 30 C40 38 32 44 24 42 Z" fill="var(--leaf)"/><path d="M14 36 C20 26 28 18 36 12" fill="none" stroke="var(--card)" stroke-width="3" stroke-linecap="round"/></svg>
+          <span id="goalText"></span>
+        </p>
+        <div class="weak-box" id="weakBox" hidden>
+          <p class="weak-title">すこし にがてかも。</p>
+          <div class="weak-chips" id="weakChips"></div>
+          <p class="weak-note">つぎは この もんだいが おおめに でるよ！</p>
+        </div>
+        <button type="button" class="detail-btn" id="detailToggle">くわしく みる。</button>
+        <div class="review-wrap" id="reviewWrap" hidden>
+          <ul class="review" id="review"></ul>
+          <div class="color-legend">
+            <p class="color-legend-title">さくらんぼの いろの いみ。</p>
+            <p class="color-legend-row"><span class="mini-cherry" data-grade="gold" aria-hidden="true"></span><span>あけずに ひとりで できた！</span></p>
+            <p class="color-legend-row"><span class="mini-cherry" data-grade="red" aria-hidden="true"></span><span>よそうが あたって できた！</span></p>
+            <p class="color-legend-row"><span class="mini-cherry" data-grade="outline" aria-hidden="true"></span><span>ヒントを みたり まちがえたり したけど がんばった！</span></p>
+          </div>
+        </div>
         <div class="result-btns">
           <button type="button" class="again-btn" id="againBtn">もういちど あそぶ！</button>
           <button type="button" class="title-btn" id="titleBtn">タイトルに もどる。</button>
@@ -962,21 +1388,22 @@
       (function () {
         "use strict";
 
-        var total = 5; // questions in the current round (5 / 10 / 20)
+        var total = 5; // questions in the current round (5 / 10 / 20 / whole pool)
         // best ms per count. Light persistence: try to keep them in the
         // browser's local storage so they survive a reload; if storage
         // is unavailable (private mode, blocked iframe storage, ...),
         // fall back to keeping them in memory for this page session.
-        var BEST_KEY = "sakuranbo-hikizan-best-times-v1";
-        var bestTimes = { 5: null, 10: null, 20: null };
+        var BEST_KEY = "sakuranbo-hikizan-best-times-v2-gold";
+        var bestTimes = {};
         (function loadBestTimes() {
           try {
             var raw = window.localStorage.getItem(BEST_KEY);
             if (!raw) return;
             var saved = JSON.parse(raw);
-            [5, 10, 20].forEach(function (c) {
-              var v = saved && saved[c];
-              if (typeof v === "number" && isFinite(v) && v > 0) bestTimes[c] = v;
+            if (!saved) return;
+            Object.keys(saved).forEach(function (k) {
+              var v = saved[k];
+              if (typeof v === "number" && isFinite(v) && v > 0) bestTimes[k] = v;
             });
           } catch (e) {
             /* storage unavailable: keep the in-memory defaults */
@@ -1031,13 +1458,36 @@
           pad: document.getElementById("pad"),
           bigCherries: document.getElementById("bigCherries"),
           resultTitle: document.getElementById("resultTitle"),
-          scoreLine: document.getElementById("scoreLine"),
-          resultMessage: document.getElementById("resultMessage"),
+          countsLine: document.getElementById("countsLine"),
+          goalText: document.getElementById("goalText"),
           timeLine: document.getElementById("timeLine"),
           bestNote: document.getElementById("bestNote"),
+          detailToggle: document.getElementById("detailToggle"),
+          reviewWrap: document.getElementById("reviewWrap"),
           review: document.getElementById("review"),
+          weakBox: document.getElementById("weakBox"),
+          weakChips: document.getElementById("weakChips"),
+          allCountSub: document.getElementById("allCountSub"),
+          guessOverlay: document.getElementById("guessOverlay"),
+          guessPanel: document.getElementById("guessPanel"),
+          guessChoices: document.getElementById("guessChoices"),
           againBtn: document.getElementById("againBtn"),
           titleBtn: document.getElementById("titleBtn"),
+          helpBtn: document.getElementById("helpBtn"),
+          quitBtn: document.getElementById("quitBtn"),
+          guideBtn: document.getElementById("guideBtn"),
+          bubble: document.getElementById("guideBubble"),
+          bubbleText: document.getElementById("guideBubbleText"),
+          speakBtn: document.getElementById("speakBtn"),
+          finger: document.getElementById("fingerMark"),
+          fingerIn: document.getElementById("fingerIn"),
+          dragPath: document.getElementById("dragPath"),
+          dragLine: document.getElementById("dragLine"),
+          guideDone: document.getElementById("guideDone"),
+          guideDoneCherries: document.getElementById("guideDoneCherries"),
+          donePlayBtn: document.getElementById("donePlayBtn"),
+          doneAgainBtn: document.getElementById("doneAgainBtn"),
+          doneTitleBtn: document.getElementById("doneTitleBtn"),
         };
 
         // ----- sound (gentle WebAudio tones) -----
@@ -1082,42 +1532,205 @@
           for (var i = 0; i < notes.length; i++) beep(notes[i], i * 0.09, 0.2, "triangle");
         }
 
-        // ----- question generation: 2-digit (11..18) minus 1-digit,
-        // always with borrowing: the subtrahend is bigger than the
-        // ones digit, so the answer lands in 2..9 -----
-        function makeQuestions(count) {
+        // ----- question pool: 2-digit (11..18) minus 1-digit, always
+        // with borrowing: the subtrahend is bigger than the ones
+        // digit, so the answer lands in 2..9 -----
+        function buildPool() {
           var pool = [];
           for (var a = 11; a <= 18; a++) {
             for (var b = 2; b <= 9; b++) {
               if (b > a - 10) pool.push({ a: a, b: b });
             }
           }
-          // shuffle
-          for (var i = pool.length - 1; i > 0; i--) {
+          return pool;
+        }
+        var POOL = buildPool();
+        var poolKeySet = {};
+        POOL.forEach(function (q) { poolKeySet[q.a + "-" + q.b] = true; });
+        function qKey(q) { return q.a + "-" + q.b; }
+        function keyToQ(k) {
+          var p = k.split("-");
+          return { a: parseInt(p[0], 10), b: parseInt(p[1], 10) };
+        }
+        function shuffleArr(arr) {
+          for (var i = arr.length - 1; i > 0; i--) {
             var j = Math.floor(Math.random() * (i + 1));
-            var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+            var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
           }
+          return arr;
+        }
+
+        // ----- weak problems, kept on the device between rounds.
+        // weakMap: "a-b" -> weight (grows with mistakes). Updated at
+        // the end of a round: problems graded がんばった join / gain
+        // weight, problems solved きん graduate off the list, and
+        // problems solved あか stay on it -----
+        var WEAK_KEY = "sakuranbo-hikizan-weak-v1";
+        var weakMap = {};
+        (function loadWeak() {
+          try {
+            var raw = window.localStorage.getItem(WEAK_KEY);
+            if (!raw) return;
+            var saved = JSON.parse(raw);
+            if (!saved) return;
+            Object.keys(saved).forEach(function (k) {
+              var v = saved[k];
+              if (poolKeySet[k] && typeof v === "number" && isFinite(v) && v > 0) {
+                weakMap[k] = v;
+              }
+            });
+          } catch (e) {
+            /* storage unavailable: weak list stays in memory only */
+          }
+        })();
+        function saveWeak() {
+          try {
+            window.localStorage.setItem(WEAK_KEY, JSON.stringify(weakMap));
+          } catch (e) {
+            /* storage unavailable: weak list stays in memory only */
+          }
+        }
+        // heaviest first; equal weights in random order (shuffle
+        // first, then a stable sort by weight)
+        function weakKeysByWeight() {
+          var keys = Object.keys(weakMap).filter(function (k) {
+            return poolKeySet[k] && weakMap[k] > 0;
+          });
+          shuffleArr(keys);
+          keys.sort(function (x, y) { return weakMap[y] - weakMap[x]; });
+          return keys;
+        }
+        var weakApplied = false; // weak list already updated for this round
+        function updateWeakFromResults() {
+          results.forEach(function (r) {
+            var k = r.a + "-" + r.b;
+            if (r.grade <= 0) {
+              weakMap[k] = (weakMap[k] || 0) + 1 + (r.wrongs || 0);
+            } else if (r.grade >= 2) {
+              delete weakMap[k]; // graduated: solved きん
+            }
+            // grade 1 (あか): stays on the list, weight unchanged
+          });
+          saveWeak();
+        }
+
+        // ----- deck: the whole pool shuffled, kept on the device and
+        // dealt without repeats, so repeated rounds keep surfacing
+        // different problems. When the deck runs out it is rebuilt
+        // with the previous round's problems at the bottom, so they
+        // come back as late as the pool allows -----
+        var DECK_KEY = "sakuranbo-hikizan-deck-v1";
+        var deckState = { deck: [], last: [] };
+        (function loadDeck() {
+          try {
+            var raw = window.localStorage.getItem(DECK_KEY);
+            if (!raw) return;
+            var saved = JSON.parse(raw);
+            if (!saved) return;
+            if (Array.isArray(saved.deck)) {
+              deckState.deck = saved.deck.filter(function (k) { return poolKeySet[k]; });
+            }
+            if (Array.isArray(saved.last)) {
+              deckState.last = saved.last.filter(function (k) { return poolKeySet[k]; });
+            }
+          } catch (e) {
+            /* storage unavailable: deck stays in memory only */
+          }
+        })();
+        function saveDeck() {
+          try {
+            window.localStorage.setItem(DECK_KEY, JSON.stringify(deckState));
+          } catch (e) {
+            /* storage unavailable: deck stays in memory only */
+          }
+        }
+        function rebuildDeck(exclude) {
+          var lastSet = {};
+          deckState.last.forEach(function (k) { lastSet[k] = true; });
+          var fresh = [];
+          var lastOnes = [];
+          POOL.forEach(function (q) {
+            var k = qKey(q);
+            if (exclude[k]) return;
+            if (lastSet[k]) lastOnes.push(k);
+            else fresh.push(k);
+          });
+          shuffleArr(fresh);
+          shuffleArr(lastOnes);
+          deckState.deck = fresh.concat(lastOnes);
+        }
+        function drawFromDeck(n, exclude) {
+          var out = [];
+          var rebuilds = 0;
+          while (out.length < n) {
+            if (deckState.deck.length === 0) {
+              if (++rebuilds > 3) break; // pool exhausted: caller fills in
+              var ex = {};
+              Object.keys(exclude).forEach(function (k) { ex[k] = true; });
+              out.forEach(function (k) { ex[k] = true; });
+              rebuildDeck(ex);
+              if (deckState.deck.length === 0) break;
+            }
+            var k = deckState.deck.shift();
+            if (exclude[k]) continue;
+            exclude[k] = true;
+            out.push(k);
+          }
+          return out;
+        }
+
+        // ----- pick a round's questions: up to half (rounded up)
+        // come from the saved weak list, the rest are dealt from the
+        // deck; no problem repeats inside one round. In ぜんぶ mode
+        // every pool problem appears once, with weak ones biased
+        // into the first half -----
+        function makeQuestions(count) {
+          var isAll = count >= POOL.length;
+          var used = {};
           var picked = [];
-          var usedPairs = {};
-          var usedAnswers = {};
-          function tryPick(q) {
-            var key = q.a + "-" + q.b;
-            if (usedPairs[key]) return;
-            usedPairs[key] = true;
-            usedAnswers[q.a - q.b] = true;
-            picked.push(q);
+          if (isAll) {
+            picked = POOL.map(qKey);
+            picked.forEach(function (k) { used[k] = true; });
+            deckState.deck = []; // the whole pool was just dealt
+          } else {
+            var cap = Math.ceil(count / 2);
+            weakKeysByWeight().slice(0, cap).forEach(function (k) {
+              if (picked.length < count && !used[k]) {
+                used[k] = true;
+                picked.push(k);
+              }
+            });
+            if (picked.length) {
+              // weak picks leave the deck too, so nothing doubles up
+              deckState.deck = deckState.deck.filter(function (k) { return !used[k]; });
+            }
+            picked = picked.concat(drawFromDeck(count - picked.length, used));
+            if (picked.length < count) {
+              // safety net (the pool is larger than any count, so
+              // this should never run): fill from what is left
+              var rest = shuffleArr(POOL.map(qKey).filter(function (k) { return !used[k]; }));
+              while (picked.length < count && rest.length) {
+                var k2 = rest.pop();
+                used[k2] = true;
+                picked.push(k2);
+              }
+            }
           }
-          var k, q;
-          for (k = 0; k < pool.length && picked.length < count; k++) {
-            q = pool[k];
-            if (usedAnswers[q.a - q.b] && picked.length < 3) continue; // spread answers early
-            tryPick(q);
+          deckState.last = picked.slice();
+          saveDeck();
+          var qs = picked.map(keyToQ);
+          if (isAll) {
+            qs.forEach(function (q) {
+              q.sortKey = weakMap[qKey(q)]
+                ? Math.random() * 0.5
+                : 0.5 + Math.random() * 0.5;
+            });
+            qs.sort(function (x, y) { return x.sortKey - y.sortKey; });
+            qs.forEach(function (q) { delete q.sortKey; });
+          } else {
+            shuffleArr(qs);
           }
-          for (k = 0; k < pool.length && picked.length < count; k++) tryPick(pool[k]);
-          while (picked.length < count) {
-            picked.push(pool[Math.floor(Math.random() * pool.length)]);
-          }
-          return picked;
+          return qs;
         }
 
         // ----- state -----
@@ -1135,8 +1748,27 @@
         var advanceTimer = null;
         var grouped = false; // partner + the "make 10" number are looped as 10
         var badgeRevealed = false; // the round badge under the 10 starts empty; tapping it shows 10 − b
+        // ----- guess (よそう) tracking, per question -----
+        var openedEver = { L: false, R: false, badge: false }; // any reveal this question
+        var guessDone = { L: false, R: false, badge: false }; // guess asked once per element per question
+        var guessMissed = false; // any wrong guess this question ("ヒントを みた")
+        var wrongCount = 0; // answer mistakes this question
+        var guessPending = null; // {kind, value, reveal} while the guess panel is open
         var dragState = null; // active drag of the need box
         var suppressClick = false; // swallow the click that ends a drag
+        // ----- guide (あそびかた) & in-play help state -----
+        var guideMode = false; // the あそびかた guide is running
+        var guideDoneShown = false; // the できたね！ panel is up
+        var guideGuessWrong = false; // a wrong guess is open in the guide
+        var guideKey = ""; // phase|sub the bubble was last synced to
+        var guidePdAllow = []; // elements the guide lets the child press (pointerdown)
+        var guideClickAllow = []; // elements the guide lets the child click
+        var dragFailCount = 0; // failed drags of the 10, this question
+        var rescueSelected = false; // tap-rescue: the 10 is tapped, partner is next
+        var bubbleText = ""; // the sentence the bubble currently shows
+        var idleTimer = null; // 5 s no-touch timer (real rounds only)
+        var fingerTarget = null; // element the finger mark is pointing at
+        var dragDemoRAF = null; // running drag-demo animation frame
 
         // element lookup for the split (only the 2-digit number splits)
         function sideEls(side) {
@@ -1147,7 +1779,7 @@
           s.sakura.classList.remove("shown");
           clearTenGroup();
           [s.boxL, s.boxR].forEach(function (box) {
-            box.classList.remove("revealed", "need", "rest", "draggable", "dragging");
+            box.classList.remove("revealed", "need", "rest", "draggable", "dragging", "tap-selected");
             box.style.transform = "";
             box.style.zIndex = "";
             box.textContent = "";
@@ -1170,11 +1802,25 @@
           return wrap.innerHTML;
         }
 
+        var GUIDE_PHASES = ["num", "boxL", "boxR", "drag", "badge", "answer"];
         function renderProgress(popLast) {
+          if (guideMode) {
+            // in the guide the top cherries are the progress bar:
+            // one cherry colours in for each step finished
+            el.progressText.innerHTML = "あそびかた";
+            var done = locked
+              ? GUIDE_PHASES.length
+              : GUIDE_PHASES.indexOf(guidePhase());
+            if (done < 0) done = 0;
+            el.progressCherries.innerHTML = cherryRow(GUIDE_PHASES.length, done);
+            el.progressCherries.classList.remove("many", "all");
+            return;
+          }
           el.progressText.innerHTML =
             "もんだい <b>" + (idx + 1) + "</b> / " + total;
           el.progressCherries.innerHTML = cherryRow(total, results.length);
           el.progressCherries.classList.toggle("many", total > 10);
+          el.progressCherries.classList.toggle("all", total >= POOL.length);
           if (popLast && results.length > 0) {
             var last = el.progressCherries.querySelectorAll(".cherry")[results.length - 1];
             if (last) last.classList.add("pop");
@@ -1276,6 +1922,17 @@
           revealedR = false;
           firstTry = true;
           locked = false;
+          openedEver = { L: false, R: false, badge: false };
+          guessDone = { L: false, R: false, badge: false };
+          guessMissed = false;
+          wrongCount = 0;
+          guessPending = null;
+          dragFailCount = 0;
+          rescueSelected = false;
+          guideGuessWrong = false;
+          el.guessOverlay.hidden = true;
+          hideFinger();
+          hideBubble();
 
           el.numA.textContent = q.a;
           el.numB.textContent = q.b;
@@ -1294,10 +1951,10 @@
           });
 
           renderProgress(false);
-          setHint(
-            cur.ones + " から " + cur.b + " は ひけないね。<br>" +
-            cur.a + " を タッチして、さくらんぼに しよう！"
-          );
+          // thinking text only: how to operate is taught by the
+          // guide, the 5-second finger and the ？ button instead
+          setHint(cur.ones + " から " + cur.b + " は ひけないから。");
+          armIdle();
         }
 
         function openSakura(side) {
@@ -1312,7 +1969,8 @@
           s.num.classList.add("opened");
           s.sakura.classList.add("shown");
           renderBlocks();
-          setHint("しかくを タッチしてね。");
+          setHint("");
+          afterStateChange();
         }
 
         // the left box always holds the 10 we subtract from: it is the
@@ -1408,6 +2066,9 @@
         function showTenGroup() {
           grouped = true;
           badgeRevealed = false;
+          rescueSelected = false;
+          var nb = needBoxEl();
+          if (nb) nb.classList.remove("tap-selected");
           el.tenBadge.textContent = "";
           el.tenBadge.classList.add("empty");
           el.tenBadge.classList.remove("revealed");
@@ -1417,11 +2078,79 @@
           el.tenGroup.classList.remove("pop");
           void el.tenGroup.offsetWidth; // restart the pop animation
           el.tenGroup.classList.add("pop");
+          afterStateChange();
         }
 
-        function revealBadge() {
+        // ----- guess panel: before a hidden number is shown for the
+        // first time in this question, the child guesses it from 3
+        // big choices (the answer and two nearby numbers, 0..10).
+        // A right guess reveals as "よそうが あたった"; a wrong one
+        // still reveals, but the question counts as "ヒントを みた" -----
+        function makeGuessChoices(correct) {
+          var offsets = [-2, -1, 1, 2];
+          for (var i = offsets.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = offsets[i]; offsets[i] = offsets[j]; offsets[j] = tmp;
+          }
+          var picks = [correct];
+          for (var k = 0; k < offsets.length && picks.length < 3; k++) {
+            var cand = correct + offsets[k];
+            if (cand >= 0 && cand <= 10 && picks.indexOf(cand) === -1) picks.push(cand);
+          }
+          for (var m = picks.length - 1; m > 0; m--) {
+            var n = Math.floor(Math.random() * (m + 1));
+            var t2 = picks[m]; picks[m] = picks[n]; picks[n] = t2;
+          }
+          return picks;
+        }
+
+        function askGuess(kind, correctValue, revealFn) {
+          if (guessDone[kind]) { revealFn(); return; }
+          if (guessPending) return;
+          guessPending = { kind: kind, value: correctValue, reveal: revealFn };
+          guideGuessWrong = false;
+          hideFinger();
+          el.guessChoices.innerHTML = "";
+          makeGuessChoices(correctValue).forEach(function (v) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = v;
+            btn.setAttribute("aria-label", "よそう " + v);
+            btn.addEventListener("click", function () { resolveGuess(v); });
+            el.guessChoices.appendChild(btn);
+          });
+          el.guessOverlay.hidden = false;
+          sndPop();
+          if (guideMode) guideSync();
+        }
+
+        function resolveGuess(chosen) {
+          if (!guessPending) return;
+          var p = guessPending;
+          if (guideMode && chosen !== p.value) {
+            // in the guide a wrong guess is never a penalty: the
+            // panel just wiggles and the finger shows the right
+            // choice, and the panel stays open until it is picked
+            guideGuessWrong = true;
+            sndTry();
+            el.guessPanel.classList.remove("shake");
+            void el.guessPanel.offsetWidth;
+            el.guessPanel.classList.add("shake");
+            var cb = correctGuessBtn();
+            if (cb) showFingerAt(cb, false);
+            return;
+          }
+          guessPending = null;
+          guessDone[p.kind] = true;
+          if (chosen !== p.value) guessMissed = true;
+          el.guessOverlay.hidden = true;
+          p.reveal();
+        }
+
+        function doRevealBadge() {
           if (!grouped || badgeRevealed) return;
           badgeRevealed = true;
+          openedEver.badge = true;
           sndPop();
           el.tenBadge.textContent = cur.diff;
           el.tenBadge.classList.remove("empty");
@@ -1432,6 +2161,12 @@
           el.tenBadge.style.animation = "";
           renderBlocks();
           updateSplitHint();
+          afterStateChange();
+        }
+
+        function revealBadge() {
+          if (!grouped || badgeRevealed) return;
+          askGuess("badge", cur.diff, doRevealBadge);
         }
 
         function onBoxPointerDown(numSide, boxSide, e) {
@@ -1514,67 +2249,90 @@
             st.box.style.transition = "transform 0.16s ease";
             st.box.style.transform = "";
             setTimeout(function () { st.box.style.transition = ""; }, 200);
+            // a real drag that missed: after two of these, the
+            // tap-twice rescue (10 を タッチ → ひく数を タッチ)
+            // takes over, in the guide and in real rounds alike
+            dragFailCount++;
+            afterStateChange();
           }
         }
 
+        // the hint line carries the thinking only ("10 から 9 を
+        // ひくと いくつかな？" and friends). Sentences that merely
+        // tell the child what to touch were removed: the guide, the
+        // 5-second finger mark and the ？ button teach operating.
         function updateSplitHint() {
           if (!openSide) return;
           if (grouped) {
             if (!badgeRevealed) {
-              setHint(
-                "10 から " + cur.b + " を ひくと いくつかな？<br>" +
-                "したの <span class='hl'>まる</span>を タッチしてね。"
-              );
+              setHint("10 から " + cur.b + " を ひくと いくつかな？");
             } else if (restRevealed()) {
               setHint(
                 "10 から " + cur.b + " を ひくと <span class='hl'>" + cur.diff + "</span>！<br>" +
                 cur.diff + " と " + cur.ones + " を たすと いくつかな？"
               );
             } else {
-              setHint(
-                "10 から " + cur.b + " を ひくと <span class='hl'>" + cur.diff + "</span>！<br>" +
-                "もう ひとつの しかくも タッチしてね。"
-              );
+              setHint("10 から " + cur.b + " を ひくと <span class='hl'>" + cur.diff + "</span>！");
             }
           } else if (needRevealed()) {
-            setHint(
-              "10 から " + cur.b + " を ひくよ。<br>" +
-              "「10」を " + cur.b + " に ドラッグして みよう！"
-            );
-          } else if (revealedL || revealedR) {
-            setHint("もう ひとつの しかくも タッチしてね。");
+            setHint("10 から " + cur.b + " を ひくよ。");
           } else {
-            setHint("しかくを タッチしてね。");
+            setHint("");
           }
         }
 
         // tapping a box shows its number; tapping it again hides it.
+        // the first show in a question goes through the guess panel
+        // (see askGuess); hiding and re-showing never asks again.
         // the 10, once shown, can also be dragged onto the number
         // being subtracted (see onBoxPointerDown and friends)
+        function doRevealBox(numSide, boxSide) {
+          var s = sideEls(numSide);
+          var isL = boxSide === "L";
+          var box = isL ? s.boxL : s.boxR;
+          var role = boxRole(numSide, boxSide);
+          if (isL) { revealedL = true; openedEver.L = true; }
+          else { revealedR = true; openedEver.R = true; }
+          box.textContent = isL ? 10 : cur.ones;
+          box.classList.add("revealed", role);
+          if (role === "need") box.classList.add("draggable");
+          renderBlocks();
+          updateSplitHint();
+          afterStateChange();
+        }
+
         function toggleBox(numSide, boxSide) {
           if (suppressClick) { suppressClick = false; return; }
-          if (openSide !== numSide || locked) return;
+          if (openSide !== numSide || locked || guessPending) return;
           var s = sideEls(numSide);
-          var leftValue = 10;
-          var rightValue = cur.ones;
           var isL = boxSide === "L";
           var box = isL ? s.boxL : s.boxR;
           var shown = isL ? revealedL : revealedR;
           var role = boxRole(numSide, boxSide);
-          sndPop();
+          if (shown && isL && dragFailCount >= 2 && !grouped) {
+            // tap rescue: once dragging has failed twice, tapping
+            // the revealed 10 selects it instead of hiding it, and
+            // tapping the number being subtracted groups them
+            rescueSelected = !rescueSelected;
+            box.classList.toggle("tap-selected", rescueSelected);
+            box.classList.toggle("draggable", !rescueSelected);
+            sndPop();
+            afterStateChange();
+            return;
+          }
           if (shown) {
+            sndPop();
             if (isL) revealedL = false; else revealedR = false;
             box.textContent = "";
             box.classList.remove("revealed", "need", "rest", "draggable");
             if (role === "need") clearTenGroup(); // the 10 falls apart with it
+            renderBlocks();
+            updateSplitHint();
           } else {
-            if (isL) revealedL = true; else revealedR = true;
-            box.textContent = isL ? leftValue : rightValue;
-            box.classList.add("revealed", role);
-            if (role === "need") box.classList.add("draggable");
+            askGuess(isL ? "L" : "R", isL ? 10 : cur.ones, function () {
+              doRevealBox(numSide, boxSide);
+            });
           }
-          renderBlocks();
-          updateSplitHint();
         }
 
         function starBurst() {
@@ -1599,6 +2357,34 @@
 
         function answer(value, btn) {
           if (locked) return;
+          if (guideMode) {
+            // the guide never scores, times or records anything:
+            // a right answer finishes it, a wrong one just wiggles
+            if (value === cur.ans) {
+              locked = true;
+              sndGood();
+              btn.classList.add("correct");
+              el.pad.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+              el.answerSlot.textContent = cur.ans;
+              el.answerSlot.classList.add("filled");
+              el.feedback.className = "feedback good";
+              el.feedback.textContent = "せいかい！";
+              starBurst();
+              renderBlocks();
+              renderProgress(true);
+              hideFinger();
+              stopDragDemo();
+              hideBubble();
+              setTimeout(showGuideDone, 1000);
+            } else {
+              sndTry();
+              btn.classList.add("wrong");
+              setTimeout(function () { btn.classList.remove("wrong"); }, 380);
+              el.feedback.className = "feedback try";
+              el.feedback.textContent = "おしい！ もういちど かんがえて みよう！";
+            }
+            return;
+          }
           if (value === cur.ans) {
             locked = true;
             sndGood();
@@ -1610,21 +2396,29 @@
             el.feedback.textContent = firstTry ? "せいかい！ すごい！" : "せいかい！ よく がんばったね！";
             starBurst();
             if (firstTry) score++;
-            results.push({ a: cur.a, b: cur.b, ans: cur.ans, firstTry: firstTry });
+            // 3-step grade: thinking points (opened nothing = 2,
+            // opened but every guess right = 1, any guess wrong = 0)
+            // minus 1 per answer mistake, floored at 0.
+            // 2 = きん, 1 = あか, 0 = がんばった
+            var anyOpened = openedEver.L || openedEver.R || openedEver.badge;
+            var base = !anyOpened ? 2 : guessMissed ? 0 : 1;
+            var grade = Math.max(0, base - wrongCount);
+            results.push({
+              a: cur.a, b: cur.b, ans: cur.ans, firstTry: firstTry, grade: grade,
+              wrongs: wrongCount, hint: guessMissed,
+            });
             if (results.length >= total) finishTime = Date.now();
             renderBlocks();
             renderProgress(true);
             advanceTimer = setTimeout(next, 1050);
           } else {
             firstTry = false;
+            wrongCount++;
             sndTry();
             btn.classList.add("wrong");
             btn.disabled = true;
             el.feedback.className = "feedback try";
             el.feedback.textContent = "おしい！ もういちど かんがえて みよう！";
-            if (!openSide) {
-              setHint(cur.a + " を タッチすると、さくらんぼが でるよ。");
-            }
           }
         }
 
@@ -1637,63 +2431,135 @@
           }
         }
 
-        // encouragement by first-try ratio, so it works for 5, 10 and 20
-        function resultText(score, count) {
-          if (score === count) {
-            return { title: "パーフェクト！！", msg: "ぜんぶ ひとりで せいかい！ きみは ひきざん めいじんだね！ また あそんで、もっと はやく できるように なろう！" };
-          }
-          var r = count ? score / count : 0;
-          if (r >= 0.8) return { title: "よく できました！", msg: "あと ちょっとで パーフェクト！ すごい ちょうしだね。もういちど やれば、ぜんぶ せいかい できるかも！" };
-          if (r >= 0.6) return { title: "すごい！ がんばったね！", msg: "さくらんぼの つかいかたが バッチリ わかっているね。もういちど やって、パーフェクトを めざそう！" };
-          if (r >= 0.4) return { title: "がんばったね！", msg: "さくらんぼで かんがえるのが じょうずに なってきたね。もういちど やると、もっと できるように なるよ！" };
-          if (r >= 0.2) return { title: "よく がんばったね！", msg: "さくらんぼの やりかたは わかったかな？ ゆっくり かんがえれば だいじょうぶ。もういちど やってみよう！" };
-          return { title: "よく がんばったね！", msg: "さいしょは むずかしいけど、さくらんぼを つかうと わかりやすくなるよ。もういちど チャレンジして、さくらんぼ めいじんを めざそう！" };
+        // one big cherry per question, coloured by its grade:
+        // きん (2) gold, あか (1) red, がんばった (0) outline only
+        function gradeCherriesHTML() {
+          var wrap = document.createElement("div");
+          results.forEach(function (r) {
+            var tmp = document.createElement("div");
+            tmp.innerHTML = CHERRY_SVG;
+            var node = tmp.querySelector(".cherry");
+            node.classList.add(r.grade >= 2 ? "gold" : r.grade === 1 ? "red" : "outline");
+            wrap.appendChild(node);
+          });
+          return wrap.innerHTML;
         }
+
+        var CLOCK_SVG =
+          '<svg viewBox="0 0 48 48" aria-hidden="true">' +
+          '<circle cx="24" cy="24" r="19" fill="none" stroke="currentColor" stroke-width="4"/>' +
+          '<path d="M24 14 L24 24 L31 28" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+          "</svg>";
 
         function showResult() {
           el.playScreen.hidden = true;
           el.resultScreen.hidden = false;
+          el.helpBtn.hidden = true;
+          hideFinger();
+          hideBubble();
+          if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           el.progressText.innerHTML = "おつかれさま！";
-          el.progressCherries.innerHTML = cherryRow(total, score);
+          el.progressCherries.innerHTML = cherryRow(total, results.length);
           el.progressCherries.classList.toggle("many", total > 10);
+          el.progressCherries.classList.toggle("all", total >= POOL.length);
 
-          var t = resultText(score, total);
-          el.resultTitle.textContent = t.title;
-          el.resultMessage.textContent = t.msg;
-          el.scoreLine.innerHTML = "<b>" + total + "</b> もん中 <b>" + score + "</b> もん、ひとりで せいかい！";
-          el.bigCherries.innerHTML = cherryRow(total, score, true);
+          var gold = 0, red = 0, outline = 0;
+          results.forEach(function (r) {
+            if (r.grade >= 2) gold++;
+            else if (r.grade === 1) red++;
+            else outline++;
+          });
+
+          el.bigCherries.innerHTML = gradeCherriesHTML();
           el.bigCherries.classList.toggle("many", total > 10);
+          el.bigCherries.classList.toggle("all", total >= POOL.length);
+
+          // one short headline only
+          el.resultTitle.textContent =
+            gold === total ? "あたまで パーフェクト！" :
+            outline === 0 ? "よく かんがえた！" : "がんばった！";
+
+          el.countsLine.innerHTML =
+            "<span class='c-gold'>きん " + gold + "こ</span>・" +
+            "<span class='c-red'>あか " + red + "こ</span>・" +
+            "がんばった " + outline + "こ。";
 
           var elapsed = finishTime && startTime ? finishTime - startTime : 0;
-          el.timeLine.innerHTML = "かかった じかん <b>" + fmtTime(elapsed) + "</b>。";
-          var prevBest = bestTimes[total];
-          if (prevBest === null || elapsed < prevBest) {
-            bestTimes[total] = elapsed;
-            saveBestTimes();
-            el.bestNote.textContent = prevBest === null
-              ? "ベストタイム とうろく！ つぎは もっと はやく できるかな？"
-              : "ベストタイム こうしん！ すごい！";
+          el.timeLine.innerHTML = CLOCK_SVG + "<span>" + fmtTime(elapsed) + "。</span>";
+
+          // best time counts only all-gold rounds (nothing opened,
+          // no mistakes); other rounds never update it
+          var allGold = total > 0 && gold === total;
+          var isNewBest = false;
+          if (allGold && elapsed > 0) {
+            var prevBest = typeof bestTimes[total] === "number" ? bestTimes[total] : null;
+            if (prevBest === null || elapsed < prevBest) {
+              bestTimes[total] = elapsed;
+              saveBestTimes();
+              isNewBest = true;
+            }
+          }
+          el.bestNote.textContent = isNewBest ? "★ ベストタイム！" : "";
+
+          // next goal: one short line
+          el.goalText.textContent =
+            outline > 0 ? "つぎは よそうを あてよう！" :
+            red > 0 ? "つぎは あけずに きんを めざそう！" :
+            "つぎは もっと はやく きんを めざそう！";
+
+          // weak problems from this round (grade がんばった): most
+          // mistakes first, ties broken by "needed the hint". The
+          // saved weak list is updated once per round, here at the
+          // end of it, and the box shows only when there is one
+          if (!weakApplied) {
+            weakApplied = true;
+            updateWeakFromResults();
+          }
+          var weakResults = results.filter(function (r) { return r.grade <= 0; });
+          weakResults.sort(function (x, y) {
+            if (y.wrongs !== x.wrongs) return y.wrongs - x.wrongs;
+            return (y.hint ? 1 : 0) - (x.hint ? 1 : 0);
+          });
+          if (weakResults.length) {
+            el.weakChips.innerHTML = "";
+            weakResults.slice(0, 3).forEach(function (r) {
+              var chip = document.createElement("span");
+              chip.className = "weak-chip";
+              chip.textContent = r.a + " − " + r.b;
+              el.weakChips.appendChild(chip);
+            });
+            if (weakResults.length > 3) {
+              var more = document.createElement("span");
+              more.className = "weak-more";
+              more.textContent = "ほか " + (weakResults.length - 3) + "もん。";
+              el.weakChips.appendChild(more);
+            }
+            el.weakBox.hidden = false;
           } else {
-            el.bestNote.textContent = "ベストタイムは " + fmtTime(prevBest) + "。つぎは こえられるかな？";
+            el.weakBox.hidden = true;
           }
 
+          // detail list stays closed until asked for
+          el.reviewWrap.hidden = true;
+          el.detailToggle.textContent = "くわしく みる。";
           el.review.innerHTML = "";
           results.forEach(function (r) {
             var li = document.createElement("li");
             var expr = document.createElement("span");
             expr.textContent = r.a + " − " + r.b + " = " + r.ans;
             var mark = document.createElement("span");
-            mark.className = "mark " + (r.firstTry ? "first" : "retry");
-            mark.textContent = r.firstTry ? "◎" : "○";
+            if (r.grade >= 2) { mark.className = "mark gold"; mark.textContent = "◎"; }
+            else if (r.grade === 1) { mark.className = "mark red"; mark.textContent = "◎"; }
+            else { mark.className = "mark outline"; mark.textContent = "○"; }
             li.appendChild(expr);
             li.appendChild(mark);
             el.review.appendChild(li);
           });
 
-          if (score / total >= 0.8) {
+          if (gold / total >= 0.8) {
             sndFanfare();
             rainStars();
-          } else if (score >= 1) {
+          } else {
             sndGood();
           }
         }
@@ -1731,10 +2597,11 @@
         }
 
         function updateBestLabels() {
-          [5, 10, 20].forEach(function (c) {
-            var span = document.getElementById("best" + c);
+          var counts = [5, 10, 20, POOL.length];
+          counts.forEach(function (c) {
+            var span = document.getElementById(c === POOL.length ? "bestAll" : "best" + c);
             if (!span) return;
-            if (bestTimes[c] === null) {
+            if (typeof bestTimes[c] !== "number") {
               span.textContent = "まだ ない。";
               span.classList.add("none");
             } else {
@@ -1746,6 +2613,7 @@
 
         function showTitle() {
           if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+          cleanupGuideUI();
           el.playScreen.hidden = true;
           el.resultScreen.hidden = true;
           el.titleScreen.hidden = false;
@@ -1755,11 +2623,14 @@
 
         function startRound(count) {
           if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+          cleanupGuideUI();
+          el.helpBtn.hidden = false;
           total = count || total;
           questions = makeQuestions(total);
           idx = 0;
           score = 0;
           results = [];
+          weakApplied = false;
           startTime = Date.now();
           finishTime = 0;
           el.titleScreen.hidden = true;
@@ -1768,6 +2639,399 @@
           el.topbar.hidden = false;
           loadQuestion();
         }
+
+        // =====================================================
+        // guide (あそびかた), speech, and in-play help
+        // =====================================================
+
+        // ----- speech: read the bubble sentence aloud (ja-JP,
+        // a little slow). If the device blocks the automatic
+        // playback, the speaker button lights up instead of
+        // showing any error, and tapping it reads the sentence -----
+        var speakAttnTimer = null;
+        function speak(text) {
+          if (!text) return;
+          bubbleText = text;
+          try {
+            if (!("speechSynthesis" in window)) {
+              el.speakBtn.classList.add("attn");
+              return;
+            }
+            window.speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = "ja-JP";
+            u.rate = 0.85;
+            u.onstart = function () { el.speakBtn.classList.remove("attn"); };
+            u.onerror = function () { el.speakBtn.classList.add("attn"); };
+            window.speechSynthesis.speak(u);
+            if (speakAttnTimer) clearTimeout(speakAttnTimer);
+            speakAttnTimer = setTimeout(function () {
+              try {
+                if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+                  el.speakBtn.classList.add("attn");
+                }
+              } catch (e) { /* speech is optional */ }
+            }, 450);
+          } catch (e) {
+            el.speakBtn.classList.add("attn");
+          }
+        }
+        function stopSpeech() {
+          try {
+            if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+          } catch (e) { /* speech is optional */ }
+        }
+
+        function showBubble(text) {
+          bubbleText = text;
+          el.bubbleText.textContent = text;
+          el.bubble.hidden = false;
+        }
+        function hideBubble() {
+          el.bubble.hidden = true;
+          stopSpeech();
+        }
+
+        // ----- the bouncing finger mark -----
+        function showFingerAt(target, soft) {
+          if (!target) return;
+          fingerTarget = target;
+          var r = target.getBoundingClientRect();
+          el.finger.style.left = r.left + r.width / 2 + "px";
+          el.finger.style.top = r.bottom + 4 + "px";
+          el.finger.classList.toggle("soft", !!soft);
+          el.finger.hidden = false;
+        }
+        function hideFinger() {
+          el.finger.hidden = true;
+          fingerTarget = null;
+        }
+        function flashFinger() {
+          if (el.finger.hidden) return;
+          el.fingerIn.style.animation = "none";
+          void el.fingerIn.offsetWidth;
+          el.fingerIn.style.animation = "";
+        }
+
+        // ----- drag demo: the finger traces a dotted path from
+        // the 10 box to the number being subtracted, over and over -----
+        function updateDragPath() {
+          var sr = el.stage.getBoundingClientRect();
+          var br = el.boxAL.getBoundingClientRect();
+          var nr = el.numB.getBoundingClientRect();
+          el.dragLine.setAttribute("x1", br.left + br.width / 2 - sr.left);
+          el.dragLine.setAttribute("y1", br.top + br.height / 2 - sr.top);
+          el.dragLine.setAttribute("x2", nr.left + nr.width / 2 - sr.left);
+          el.dragLine.setAttribute("y2", nr.top + nr.height / 2 - sr.top);
+        }
+        function startDragDemo() {
+          if (dragDemoRAF) return;
+          updateDragPath();
+          el.dragPath.hidden = false;
+          el.finger.classList.remove("soft");
+          el.finger.hidden = false;
+          fingerTarget = null;
+          var t0 = null;
+          function frame(ts) {
+            if (!guideMode) { dragDemoRAF = null; return; }
+            if (!t0) t0 = ts;
+            var t = ((ts - t0) % 1750) / 1250;
+            if (t > 1) t = 1;
+            var e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+            var br = el.boxAL.getBoundingClientRect();
+            var nr = el.numB.getBoundingClientRect();
+            var x1 = br.left + br.width / 2, y1 = br.bottom;
+            var x2 = nr.left + nr.width / 2, y2 = nr.bottom;
+            el.finger.style.left = x1 + (x2 - x1) * e + "px";
+            el.finger.style.top = y1 + (y2 - y1) * e + "px";
+            dragDemoRAF = requestAnimationFrame(frame);
+          }
+          dragDemoRAF = requestAnimationFrame(frame);
+        }
+        function stopDragDemo() {
+          if (dragDemoRAF) cancelAnimationFrame(dragDemoRAF);
+          dragDemoRAF = null;
+          el.dragPath.hidden = true;
+        }
+
+        // ----- which step are we on, and what does it ask? -----
+        function guidePhase() {
+          if (!openSide) return "num";
+          if (grouped) return badgeRevealed ? "answer" : "badge";
+          if (!revealedL) return "boxL";
+          if (!revealedR) return "boxR";
+          return "drag";
+        }
+        function guideInstruction(phase, sub) {
+          if (phase === "num") return "かずを タッチしてね！";
+          if (phase === "boxL") return "しかくを タッチして、かずを あててね！";
+          if (phase === "boxR") return "もう ひとつの しかくを タッチして、かずを あててね！";
+          if (phase === "drag") {
+            return sub === "drag"
+              ? "あかい 10を うごかして、" + cur.b + "に あわせてね！"
+              : "10を タッチして、つぎに " + cur.b + "を タッチしてね！";
+          }
+          if (phase === "badge") return "まるを タッチして、かずを あててね！";
+          return "こたえを タッチしてね！";
+        }
+        // the same one-sentence instruction, for real rounds (？ button)
+        function stepInstruction() {
+          if (!cur) return "";
+          if (!openSide) return "かずを タッチしてね！";
+          if (grouped) {
+            if (!badgeRevealed) return "まるを タッチして、かずを あててね！";
+            if (!revealedR) return "もう ひとつの しかくを タッチして、かずを あててね！";
+            return "こたえを タッチしてね！";
+          }
+          if (!revealedL) return "しかくを タッチして、かずを あててね！";
+          if (dragFailCount >= 2) return "10を タッチして、つぎに " + cur.b + "を タッチしてね！";
+          return "あかい 10を うごかして、" + cur.b + "に あわせてね！";
+        }
+        // where the finger should point in a real round right now
+        function currentTargetEl() {
+          if (!cur || locked || guessPending) return null;
+          if (!openSide) return el.numA;
+          if (grouped) {
+            if (!badgeRevealed) return el.tenBadge;
+            if (!revealedR) return el.boxAR;
+            return el.pad;
+          }
+          if (!revealedL) return el.boxAL;
+          if (dragFailCount >= 2 && !rescueSelected) return el.boxAL;
+          if (dragFailCount >= 2 && rescueSelected) return el.numB;
+          return el.boxAL; // the drag target
+        }
+        function guessBtns() {
+          return Array.prototype.slice.call(el.guessChoices.querySelectorAll("button"));
+        }
+        function correctGuessBtn() {
+          if (!guessPending) return null;
+          var btns = guessBtns();
+          for (var i = 0; i < btns.length; i++) {
+            if (parseInt(btns[i].textContent, 10) === guessPending.value) return btns[i];
+          }
+          return null;
+        }
+
+        // ----- guide sync: bubble, voice, gate and finger follow
+        // the real step transitions of the question on screen -----
+        function clearGlows() {
+          [el.numA, el.boxAL, el.boxAR, el.tenBadge, el.pad, el.numB].forEach(function (n) {
+            n.classList.remove("guide-glow");
+          });
+        }
+        function setGuideTargets(phase, sub) {
+          var pd = [], ck = [], glow = null;
+          if (guessPending) {
+            pd = guessBtns(); ck = pd.slice();
+          } else if (phase === "num") {
+            pd = [el.numA]; ck = [el.numA]; glow = el.numA;
+          } else if (phase === "boxL") {
+            pd = [el.boxAL]; ck = [el.boxAL]; glow = el.boxAL;
+          } else if (phase === "boxR") {
+            pd = [el.boxAR]; ck = [el.boxAR]; glow = el.boxAR;
+          } else if (phase === "drag") {
+            if (sub === "drag") { pd = [el.boxAL]; ck = []; glow = el.boxAL; }
+            else if (sub === "tap2") { pd = [el.numB]; ck = [el.numB]; glow = el.numB; }
+            else { pd = [el.boxAL]; ck = [el.boxAL]; glow = el.boxAL; }
+          } else if (phase === "badge") {
+            pd = [el.tenBadge]; ck = [el.tenBadge]; glow = el.tenBadge;
+          } else if (phase === "answer") {
+            pd = Array.prototype.slice.call(el.pad.querySelectorAll("button"));
+            ck = pd.slice();
+            glow = el.pad;
+          }
+          guidePdAllow = pd;
+          guideClickAllow = ck;
+          clearGlows();
+          if (glow && !guessPending) glow.classList.add("guide-glow");
+        }
+        function updateGuidePointer(phase, sub) {
+          if (guessPending) {
+            stopDragDemo();
+            if (guideGuessWrong) {
+              var cb = correctGuessBtn();
+              if (cb) { showFingerAt(cb, false); return; }
+            }
+            hideFinger();
+            return;
+          }
+          if (phase === "drag" && sub === "drag") { startDragDemo(); return; }
+          stopDragDemo();
+          var t = null;
+          if (phase === "num") t = el.numA;
+          else if (phase === "boxL") t = el.boxAL;
+          else if (phase === "boxR") t = el.boxAR;
+          else if (phase === "drag") t = sub === "tap2" ? el.numB : el.boxAL;
+          else if (phase === "badge") t = el.tenBadge;
+          else if (phase === "answer") t = el.pad;
+          if (t) showFingerAt(t, false);
+          else hideFinger();
+        }
+        function guideSync(force) {
+          if (!guideMode || guideDoneShown) return;
+          var phase = guidePhase();
+          var sub = guessPending
+            ? "guess"
+            : phase === "drag"
+              ? dragFailCount >= 2
+                ? rescueSelected ? "tap2" : "tap1"
+                : "drag"
+              : "";
+          setGuideTargets(phase, sub);
+          // opening the guess panel is part of the same step, so
+          // it does not re-read the same sentence
+          var key = phase + "|" + (sub === "guess" ? "" : sub);
+          if (force || key !== guideKey) {
+            guideKey = key;
+            var text = guideInstruction(phase, sub);
+            showBubble(text);
+            speak(text);
+            renderProgress(false);
+          }
+          updateGuidePointer(phase, sub);
+        }
+        function afterStateChange() {
+          if (guideMode) guideSync();
+          armIdle();
+        }
+
+        // ----- guide start / finish -----
+        function cleanupGuideUI() {
+          guideMode = false;
+          guideDoneShown = false;
+          guideGuessWrong = false;
+          guideKey = "";
+          guidePdAllow = [];
+          guideClickAllow = [];
+          rescueSelected = false;
+          document.body.classList.remove("guide-on");
+          el.guideDone.hidden = true;
+          el.quitBtn.hidden = true;
+          clearGlows();
+          stopDragDemo();
+          hideFinger();
+          hideBubble();
+        }
+        function startGuide() {
+          cleanupGuideUI();
+          guideMode = true;
+          document.body.classList.add("guide-on");
+          // one fixed example, solved on the real play screen.
+          // No timer, no score, no results: the weak list, the
+          // deck and the best times are never touched.
+          questions = [{ a: 12, b: 9 }];
+          total = 1;
+          idx = 0;
+          results = [];
+          score = 0;
+          el.titleScreen.hidden = true;
+          el.resultScreen.hidden = true;
+          el.playScreen.hidden = false;
+          el.topbar.hidden = false;
+          el.quitBtn.hidden = false;
+          el.helpBtn.hidden = true;
+          loadQuestion();
+          guideSync(true);
+        }
+        function showGuideDone() {
+          if (!guideMode) return;
+          guideDoneShown = true;
+          hideFinger();
+          stopDragDemo();
+          clearGlows();
+          el.guideDone.hidden = false;
+          sndFanfare();
+        }
+        function endGuide() {
+          cleanupGuideUI();
+          showTitle();
+        }
+
+        // ----- the guide gate: while guiding, only the current
+        // target (and やめる / the speaker) can be pressed -----
+        function guideGate(e) {
+          if (!guideMode) return;
+          var t = e.target;
+          if (t && t.closest) {
+            if (t.closest("#guideBubble") || t.closest("#quitBtn")) return;
+            if (!el.guideDone.hidden) {
+              if (t.closest("#guideDone")) return;
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              return;
+            }
+          }
+          var allow = e.type === "click" ? guideClickAllow : guidePdAllow;
+          for (var i = 0; i < allow.length; i++) {
+            if (allow[i] === t || (allow[i].contains && allow[i].contains(t))) return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          flashFinger();
+        }
+        document.addEventListener("pointerdown", guideGate, true);
+        document.addEventListener("click", guideGate, true);
+
+        // ----- real rounds: after 5 s with no touch at all, a
+        // soft finger mark appears where the next touch goes.
+        // Any touch hides it and restarts the count. Never while
+        // the guess panel is open (it would give the answer away) -----
+        function armIdle() {
+          if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+          if (guideMode || el.playScreen.hidden || locked) return;
+          idleTimer = setTimeout(function () {
+            idleTimer = null;
+            if (guideMode || el.playScreen.hidden || locked || guessPending) return;
+            if (dragState) { armIdle(); return; }
+            var t = currentTargetEl();
+            if (t) showFingerAt(t, true);
+          }, 5000);
+        }
+        document.addEventListener("pointerdown", function (e) {
+          if (guideMode || el.playScreen.hidden) return;
+          hideFinger();
+          var t = e.target;
+          if (!t || !t.closest || (!t.closest("#guideBubble") && !t.closest("#helpBtn"))) {
+            hideBubble();
+          }
+          armIdle();
+        }, true);
+
+        // ----- new buttons -----
+        el.guideBtn.addEventListener("click", function () { sndPop(); startGuide(); });
+        el.quitBtn.addEventListener("click", function () { sndPop(); endGuide(); });
+        el.donePlayBtn.addEventListener("click", function () { sndPop(); endGuide(); });
+        el.doneTitleBtn.addEventListener("click", function () { sndPop(); endGuide(); });
+        el.doneAgainBtn.addEventListener("click", function () { sndPop(); startGuide(); });
+        el.helpBtn.addEventListener("click", function () {
+          var text = stepInstruction();
+          if (!text) return;
+          showBubble(text);
+          speak(text);
+        });
+        el.speakBtn.addEventListener("click", function () {
+          el.speakBtn.classList.remove("attn");
+          speak(bubbleText);
+        });
+        // tap rescue, second tap: the number being subtracted
+        el.numB.addEventListener("click", function () {
+          if (locked || grouped || !openSide || !rescueSelected) return;
+          rescueSelected = false;
+          var box = needBoxEl();
+          if (box) box.classList.remove("tap-selected");
+          sndTen();
+          showTenGroup();
+          updateSplitHint();
+        });
+        window.addEventListener("resize", function () {
+          if (dragDemoRAF) updateDragPath();
+          else if (!el.finger.hidden && fingerTarget) {
+            showFingerAt(fingerTarget, el.finger.classList.contains("soft"));
+          }
+        });
 
         // ----- build answer pad 2..9 -----
         for (var v = 2; v <= 9; v++) {
@@ -1816,15 +3080,32 @@
             if (grouped) positionTenGroup();
           });
         }
+        el.detailToggle.addEventListener("click", function () {
+          sndPop();
+          var open = el.reviewWrap.hidden;
+          el.reviewWrap.hidden = !open;
+          el.detailToggle.textContent = open ? "とじる。" : "くわしく みる。";
+        });
         el.againBtn.addEventListener("click", function () { sndPop(); startRound(total); });
         el.titleBtn.addEventListener("click", function () { sndPop(); showTitle(); });
         document.querySelectorAll(".count-btn").forEach(function (btn) {
           btn.addEventListener("click", function () {
-            startRound(parseInt(btn.getAttribute("data-count"), 10));
+            var c = btn.getAttribute("data-count");
+            startRound(c === "all" ? POOL.length : parseInt(c, 10));
           });
         });
 
+        // the ぜんぶ button shows the real pool size, and the colour
+        // legend in the result detail gets its little cherries
+        el.allCountSub.textContent = POOL.length + "もん。";
+        document.querySelectorAll(".mini-cherry").forEach(function (span) {
+          span.innerHTML = CHERRY_SVG;
+          var node = span.querySelector(".cherry");
+          if (node) node.classList.add(span.getAttribute("data-grade"));
+        });
+
         el.titleCherries.innerHTML = cherryRow(2, 2, true);
+        el.guideDoneCherries.innerHTML = cherryRow(2, 2, true);
         showTitle();
       })();
     </script>
