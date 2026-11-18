@@ -1008,7 +1008,7 @@
       }
       .guide-btn:active { transform: translateY(4px); border-bottom-width: 3px; }
 
-      /* one-sentence speech bubble (guide steps & the ？ button) */
+      /* one-sentence instruction frame (guide steps & the ？ button) */
       .guide-bubble {
         position: fixed;
         left: 50%;
@@ -1024,16 +1024,6 @@
         padding: 10px 12px 10px 18px;
         max-width: min(620px, 94vw);
         box-shadow: 0 10px 24px rgba(30, 18, 14, 0.25);
-      }
-      .guide-bubble::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: -13px;
-        transform: translateX(-50%);
-        border: 7px solid transparent;
-        border-top: 9px solid var(--accent);
-        border-bottom: 0;
       }
       .guide-bubble-text {
         font-size: clamp(19px, min(5vw, 3.6vh), 29px);
@@ -1324,7 +1314,7 @@
       <!-- ======== guess overlay ======== -->
       <div class="guess-overlay" id="guessOverlay" hidden>
         <div class="guess-panel" id="guessPanel" role="dialog" aria-label="よそう">
-          <p class="guess-q">なんの かずだと おもう？</p>
+          <p class="guess-q">どれかな？</p>
           <div class="guess-choices" id="guessChoices"></div>
         </div>
       </div>
@@ -1358,25 +1348,24 @@
         <p class="counts-line" id="countsLine"></p>
         <p class="time-small" id="timeLine"></p>
         <p class="best-note" id="bestNote"></p>
-        <p class="goal-line">
-          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 42 C10 34 6 20 8 6 C22 8 34 16 38 30 C40 38 32 44 24 42 Z" fill="var(--leaf)"/><path d="M14 36 C20 26 28 18 36 12" fill="none" stroke="var(--card)" stroke-width="3" stroke-linecap="round"/></svg>
-          <span id="goalText"></span>
-        </p>
+        <button type="button" class="detail-btn" id="detailToggle">くわしく みる。</button>
+        <div class="review-wrap" id="reviewWrap" hidden>
+          <ul class="review" id="review"></ul>
+          <div class="color-legend">
+            <p class="color-legend-row"><span class="mini-cherry" data-grade="gold" aria-hidden="true"></span><span>さくらんぼを つかわないで できた！</span></p>
+            <p class="color-legend-row"><span class="mini-cherry" data-grade="red" aria-hidden="true"></span><span>さくらんぼを つかって できた！</span></p>
+            <p class="color-legend-row"><span class="mini-cherry" data-grade="outline" aria-hidden="true"></span><span>まちがえた ところも あったけど がんばった！</span></p>
+          </div>
+        </div>
         <div class="weak-box" id="weakBox" hidden>
           <p class="weak-title">すこし にがてかも。</p>
           <div class="weak-chips" id="weakChips"></div>
           <p class="weak-note">つぎは この もんだいが おおめに でるよ！</p>
         </div>
-        <button type="button" class="detail-btn" id="detailToggle">くわしく みる。</button>
-        <div class="review-wrap" id="reviewWrap" hidden>
-          <ul class="review" id="review"></ul>
-          <div class="color-legend">
-            <p class="color-legend-title">さくらんぼの いろの いみ。</p>
-            <p class="color-legend-row"><span class="mini-cherry" data-grade="gold" aria-hidden="true"></span><span>あけずに ひとりで できた！</span></p>
-            <p class="color-legend-row"><span class="mini-cherry" data-grade="red" aria-hidden="true"></span><span>よそうが あたって できた！</span></p>
-            <p class="color-legend-row"><span class="mini-cherry" data-grade="outline" aria-hidden="true"></span><span>ヒントを みたり まちがえたり したけど がんばった！</span></p>
-          </div>
-        </div>
+        <p class="goal-line">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 42 C10 34 6 20 8 6 C22 8 34 16 38 30 C40 38 32 44 24 42 Z" fill="var(--leaf)"/><path d="M14 36 C20 26 28 18 36 12" fill="none" stroke="var(--card)" stroke-width="3" stroke-linecap="round"/></svg>
+          <span id="goalText"></span>
+        </p>
         <div class="result-btns">
           <button type="button" class="again-btn" id="againBtn">もういちど あそぶ！</button>
           <button type="button" class="title-btn" id="titleBtn">タイトルに もどる。</button>
